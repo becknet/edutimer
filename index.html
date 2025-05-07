@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Zeiterfassung Lehrpersonen</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
+    header { background: #2c3e50; color: white; padding: 1rem; text-align: center; }
+    nav { display: flex; justify-content: center; gap: 1rem; margin: 1rem 0; }
+    nav button { padding: 0.5rem 1rem; }
+    section { display: none; padding: 1rem; }
+    section.active { display: block; }
+    .list { list-style: none; padding: 0; }
+    .list li { padding: 0.5rem; border-bottom: 1px solid #ddd; display: flex; justify-content: space-between; align-items: center; }
+    form > * { margin: 0.5rem 0; display: block; }
+    .btn-lesson { margin: 0.2rem; }
+    table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+    table, th, td { border: 1px solid #ccc; }
+    th, td { padding: 0.5rem; text-align: center; }
+    .btn-small { margin-left: 0.5rem; font-size: 0.8rem; }
+    /* Sliding animation and labels for entries list */
+    .list li {
+      position: relative;
+      overflow: hidden;
+    }
+    .list li .label {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+      z-index: 1;
+      font-size: 0.95rem;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+    .list li .edit-label {
+      left: 0;
+      background: #3498db;
+    }
+    .list li .delete-label {
+      right: 0;
+      background: #e74c3c;
+    }
+    .list li .content {
+      transition: transform 0.2s ease;
+      padding: 0.5rem;
+      background: transparent;
+      width: 100%;
+      z-index: 2;
+      position: relative;
+    }
+    /* Day navigation centered */
+    .day-nav {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      margin: 1rem 0;
+    }
+    .day-nav h2 {
+      margin: 0;
+    }
+    .day-nav button {
+      font-size: 1.2rem;
+      padding: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+  <header>Zeiterfassung Lehrpersonen</header>
+  <nav>
+    <button data-target="config">Konfiguration</button>
+    <button data-target="day">Tagesansicht</button>
+    <button data-target="overview">Übersicht</button>
+  </nav>
+
+  <section id="config">
+    <h2>Konfiguration</h2>
+    <form id="config-form">
+      <label>Jahresarbeitszeit (Stunden): <input type="number" id="year-hours" required /></label>
+      <label>Anstellungsgrad (%): <input type="number" id="employment-rate" required min="0" max="100" step="0.01" /></label>
+      <label>Start Schuljahr: <input type="date" id="year-start" required /></label>
+      <label>Ende Schuljahr: <input type="date" id="year-end" required /></label>
+      <button type="submit">Speichern</button>
+    </form>
+    <h3>Kategorien verwalten</h3>
+    <form id="cat-form">
+      <label>Code: <input type="text" id="cat-code" required maxlength="5" /></label>
+      <label>Name: <input type="text" id="cat-name" required /></label>
+      <button type="submit">Kategorie hinzufügen</button>
+    </form>
+    <ul class="list" id="cat-list"></ul>
+  </section>
+
+  <section id="day">
+    <div class="day-nav">
+      <button id="prev-day">←</button>
+      <h2 id="current-date"></h2>
+      <button id="next-day">→</button>
+    </div>
+    <form id="entry-form">
+      <label>Stunden: <input type="number" id="hours-input" min="0" /></label>
+      <label>Minuten: <input type="number" id="minutes-input" min="0" max="59" /></label>
+      <div>Lektionen:
+        <span id="lesson-buttons"></span>
+      </div>
+      <label>Kategorie:
+        <select id="category-select"></select>
+      </label>
+      <label>Bemerkung: <input type="text" id="note" /></label>
+      <button type="submit">Eintrag hinzufügen</button>
+    </form>
+    <ul class="list" id="entries-list"></ul>
+  </section>
+
+  <section id="overview">
+    <h2>Übersicht</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Bereich</th>
+          <th>SOLL (h)</th>
+          <th>SOLL (%)</th>
+          <th>IST (h)</th>
+          <th>IST (%)</th>
+        </tr>
+      </thead>
+      <tbody id="overview-body"></tbody>
+    </table>
+    <h3>IST nach Kategorie</h3>
+    <table>
+      <thead>
+        <tr><th>Kategorie</th><th>IST (h)</th><th>IST (%)</th></tr>
+      </thead>
+      <tbody id="cat-overview-body"></tbody>
+    </table>
+    <button id="export-btn">Export als CSV</button>
+  </section>
+
+  <script>
+    const DB_NAME = 'TimeTrackerDB', DB_VERSION = 2;
+    const STORE_CONFIG = 'config', STORE_ENTRIES = 'entries', STORE_CATEGORIES = 'categories';
+    let db;
+    function openDB() {
+      return new Promise((res, rej) => {
+        const req = indexedDB.open(DB_NAME, DB_VERSION);
+        req.onupgradeneeded = () => {
+          db = req.result;
+          if(!db.objectStoreNames.contains(STORE_CONFIG)) db.createObjectStore(STORE_CONFIG, { keyPath: 'id' });
+          if(!db.objectStoreNames.contains(STORE_ENTRIES)) db.createObjectStore(STORE_ENTRIES, { keyPath: 'id', autoIncrement: true });
+          if(!db.objectStoreNames.contains(STORE_CATEGORIES)) db.createObjectStore(STORE_CATEGORIES, { keyPath: 'id', autoIncrement: true });
+        };
+        req.onsuccess = () => { db = req.result; res(db); };
+        req.onerror = () => rej(req.error);
+      });
+    }
+    function tx(storeName, mode='readonly') { return db.transaction(storeName, mode).objectStore(storeName); }
+
+    async function seedCategories() {
+      const all = await new Promise(res => tx(STORE_CATEGORIES).getAll().onsuccess = e => res(e.target.result));
+      if(all.length === 0) {
+        const defaults = [
+          { code: 'A', name: 'Unterricht' },
+          { code: 'B', name: 'Unterrichtsbezogene Aufgaben' },
+          { code: 'C', name: 'Schulbezogene Aufgaben' },
+          { code: 'D', name: 'Beratung' },
+          { code: 'E', name: 'Personalentwicklung' },
+          { code: 'EA', name: 'Spezialfunktionen' }
+        ];
+        const store = tx(STORE_CATEGORIES, 'readwrite'); defaults.forEach(cat => store.add(cat));
+      }
+    }
+
+    // Kategorien laden
+    const catForm = document.getElementById('cat-form'), catList = document.getElementById('cat-list'), catSelect = document.getElementById('category-select');
+    catForm.addEventListener('submit', e => {
+      e.preventDefault(); const cat = { code: document.getElementById('cat-code').value.trim(), name: document.getElementById('cat-name').value.trim() };
+      tx(STORE_CATEGORIES, 'readwrite').add(cat); catForm.reset(); loadCategories();
+    });
+    function loadCategories() {
+      catList.innerHTML = ''; catSelect.innerHTML = '';
+      tx(STORE_CATEGORIES).openCursor().onsuccess = e => {
+        const cur = e.target.result;
+        if(cur) {
+          const c = cur.value;
+          const li = document.createElement('li'); li.textContent = `${c.code} - ${c.name}`;
+          const del = document.createElement('button'); del.textContent='Löschen'; del.className='btn-small';
+          del.onclick = () => { tx(STORE_CATEGORIES,'readwrite').delete(c.id); loadCategories(); };
+          li.appendChild(del); catList.appendChild(li);
+          const opt = document.createElement('option'); opt.value = c.code; opt.textContent = `${c.code} ${c.name}`;
+          catSelect.appendChild(opt);
+          cur.continue();
+        }
+      };
+    }
+
+    // Konfiguration laden/speichern
+    document.getElementById('config-form').addEventListener('submit', e => {
+      e.preventDefault(); const cfg = { id:1, yearHours:+document.getElementById('year-hours').value, employment:+document.getElementById('employment-rate').value, start:document.getElementById('year-start').value, end:document.getElementById('year-end').value };
+      tx(STORE_CONFIG,'readwrite').put(cfg); alert('Konfiguration gespeichert');
+    });
+    function loadConfig() { tx(STORE_CONFIG).get(1).onsuccess = e => { const c=e.target.result; if(c) { document.getElementById('year-hours').value=c.yearHours; document.getElementById('employment-rate').value=c.employment; document.getElementById('year-start').value=c.start; document.getElementById('year-end').value=c.end; } }; }
+
+    // Tagesansicht mit Lektionstasten
+    let currentDate = new Date(); const dateEl = document.getElementById('current-date'), entriesList = document.getElementById('entries-list');
+    function renderDate() { dateEl.textContent = currentDate.toLocaleDateString('de-DE'); }
+    document.getElementById('prev-day').onclick = () => { currentDate.setDate(currentDate.getDate()-1); loadEntries(); };
+    document.getElementById('next-day').onclick = () => { currentDate.setDate(currentDate.getDate()+1); loadEntries(); };
+
+    // Lektionstasten erzeugen
+    const lessonContainer = document.getElementById('lesson-buttons'); let lessonMinutes = 0;
+    for(let i=1; i<=10; i++) {
+      const btn = document.createElement('button'); btn.type='button'; btn.className='btn-lesson'; btn.textContent=i;
+      btn.onclick = () => { lessonMinutes = i*45; document.getElementById('hours-input').value = Math.floor(lessonMinutes/60); document.getElementById('minutes-input').value = lessonMinutes%60; };
+      lessonContainer.appendChild(btn);
+    }
+
+    document.getElementById('entry-form').addEventListener('submit', e => {
+      e.preventDefault(); const h=+document.getElementById('hours-input').value, m=+document.getElementById('minutes-input').value;
+      const mins = h*60 + m; if(mins<=0) return alert('Bitte Zeit angeben');
+      const entry={ date: currentDate.toISOString().slice(0,10), minutes: mins, category:document.getElementById('category-select').value, note:document.getElementById('note').value.trim() };
+      tx(STORE_ENTRIES,'readwrite').add(entry); e.target.reset(); lessonMinutes=0; loadEntries();
+    });
+    function loadEntries() {
+      renderDate();
+      entriesList.innerHTML = '';
+      tx(STORE_ENTRIES).openCursor().onsuccess = e => {
+        const cur = e.target.result;
+        if (cur) {
+          const en = cur.value;
+          if (en.date === currentDate.toISOString().slice(0, 10)) {
+            const li = document.createElement('li');
+            // --- Add edit/delete labels and wrap content ---
+            const editLabel = document.createElement('div');
+            editLabel.className = 'label edit-label';
+            editLabel.textContent = 'Edit';
+            const deleteLabel = document.createElement('div');
+            deleteLabel.className = 'label delete-label';
+            deleteLabel.textContent = 'Delete';
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'content';
+            contentDiv.textContent = `${(en.minutes / 60).toFixed(2)}h | ${en.category} | ${en.note}`;
+            li.appendChild(editLabel);
+            li.appendChild(deleteLabel);
+            li.appendChild(contentDiv);
+            // --- Swipe handling ---
+            let touchStartX = null;
+            contentDiv.addEventListener('touchstart', ev => {
+              if (ev.touches && ev.touches.length === 1) touchStartX = ev.touches[0].clientX;
+            });
+            contentDiv.addEventListener('touchmove', ev => {
+              if (ev.touches && ev.touches.length === 1) {
+                const deltaX = ev.touches[0].clientX - touchStartX;
+                contentDiv.style.transform = `translateX(${deltaX}px)`;
+                // Show the correct label during swipe
+                if (deltaX > 0) {
+                  editLabel.style.opacity = '1';
+                  deleteLabel.style.opacity = '0';
+                } else if (deltaX < 0) {
+                  deleteLabel.style.opacity = '1';
+                  editLabel.style.opacity = '0';
+                }
+              }
+            });
+            contentDiv.addEventListener('touchend', ev => {
+              if (touchStartX !== null && ev.changedTouches && ev.changedTouches.length === 1) {
+                const deltaX = ev.changedTouches[0].clientX - touchStartX;
+                const id = en.id;
+                if (deltaX < -50) {
+                  // Swipe left: delete
+                  tx(STORE_ENTRIES, 'readwrite').delete(id);
+                  loadEntries();
+                } else if (deltaX > 50) {
+                  // Swipe right: edit
+                  tx(STORE_ENTRIES).get(id).onsuccess = evGet => {
+                    const entry = evGet.target.result;
+                    if (entry) {
+                      document.getElementById('hours-input').value = Math.floor(entry.minutes / 60);
+                      document.getElementById('minutes-input').value = entry.minutes % 60;
+                      document.getElementById('category-select').value = entry.category;
+                      document.getElementById('note').value = entry.note;
+                      // Remove the entry being edited
+                      tx(STORE_ENTRIES, 'readwrite').delete(id);
+                      loadEntries();
+                    }
+                  };
+                }
+              }
+              setTimeout(() => { contentDiv.style.transform = 'translateX(0px)'; }, 200);
+              // Hide both labels after swipe ends
+              editLabel.style.opacity = '0';
+              deleteLabel.style.opacity = '0';
+              touchStartX = null;
+            });
+            // Also handle touchstart/touchend on li itself for compatibility
+            li.addEventListener('touchstart', ev => {
+              if (ev.touches && ev.touches.length === 1) touchStartX = ev.touches[0].clientX;
+            });
+            li.addEventListener('touchend', ev => {
+              setTimeout(() => { contentDiv.style.transform = 'translateX(0px)'; }, 200);
+              // Hide both labels after swipe ends
+              editLabel.style.opacity = '0';
+              deleteLabel.style.opacity = '0';
+              touchStartX = null;
+            });
+            entriesList.appendChild(li);
+          }
+          cur.continue();
+        }
+      };
+    }
+
+    // Übersicht und CSV Export bleiben unverändert...
+function renderOverview() {
+  const tbody = document.getElementById('overview-body');
+  tbody.innerHTML = '';
+  tx(STORE_CONFIG).get(1).onsuccess = e => {
+    const c = e.target.result;
+    if (!c) return;
+    // Period between start and end dates
+    const start = new Date(c.start);
+    const end = new Date(c.end);
+    const msPerDay = 1000 * 60 * 60 * 24;
+    const days = Math.floor((end - start) / msPerDay) + 1;
+    // Scale annual hours to period length
+    const total = c.yearHours * (c.employment / 100) * (days / 365);
+    const groups = { "A+B": 0.874, "C+D+E": 0.126 };
+    const sums = { "A+B": 0, "C+D+E": 0 };
+    tx(STORE_ENTRIES).getAll().onsuccess = ev => {
+      // Only consider entries within the school-year period
+      const entries = ev.target.result.filter(it =>
+        it.date >= c.start && it.date <= c.end
+      );
+      entries.forEach(it => {
+        if (["A", "B"].includes(it.category)) sums["A+B"] += it.minutes;
+        if (["C", "D", "E", "EA"].includes(it.category)) sums["C+D+E"] += it.minutes;
+      });
+      Object.entries(groups).forEach(([label, ratio]) => {
+        const tr = document.createElement('tr');
+        const sollHours = total * ratio;
+        const istHours = sums[label] / 60;
+        const istPercent = istHours / total * 100;
+        tr.innerHTML = `
+          <td>${label}</td>
+          <td>${sollHours.toFixed(2)}</td>
+          <td>${(ratio * 100).toFixed(1)}</td>
+          <td>${istHours.toFixed(2)}</td>
+          <td>${istPercent.toFixed(1)}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+      // IST nach Gruppen A+B und C+D+E
+      const catBody = document.getElementById('cat-overview-body');
+      catBody.innerHTML = '';
+      const detailGroups = {
+        "A+B": ["A", "B"],
+        "C+D+E": ["C", "D", "E", "EA"]
+      };
+      const totalIstMinutes = entries.reduce((sum, it) => sum + it.minutes, 0);
+      Object.entries(detailGroups).forEach(([label, codes]) => {
+        const groupMinutes = entries
+          .filter(it => codes.includes(it.category))
+          .reduce((sum, it) => sum + it.minutes, 0);
+        const hours = groupMinutes / 60;
+        const percent = totalIstMinutes ? (groupMinutes / totalIstMinutes * 100) : 0;
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${label}</td>
+          <td>${hours.toFixed(2)}</td>
+          <td>${percent.toFixed(1)}</td>
+        `;
+        catBody.appendChild(row);
+      });
+    };
+  };
+}
+    document.getElementById('export-btn').onclick = () => { tx(STORE_ENTRIES).getAll().onsuccess=e=>{ const all=e.target.result; if(!all.length) return alert('Keine Einträge.'); const hdr=['id','date','minutes','category','note']; const rows=all.map(o=>hdr.map(h=>`"${(o[h]||'').toString().replace(/"/g,'""')}"`).join(';')); const csv=[hdr.join(';'),...rows].join('\r\n'); const blob=new Blob([csv],{type:'text/csv'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='daten_export.csv'; a.click(); URL.revokeObjectURL(url); }; };
+
+    // Init & Navigation
+    (async()=>{
+      await openDB();
+      await seedCategories();
+      loadConfig();
+      loadCategories();
+
+      // Set initial min/max attributes for year-start and year-end
+      const startInput = document.getElementById('year-start');
+      const endInput = document.getElementById('year-end');
+      // Initialize constraints if values already set
+      if (startInput.value) endInput.min = startInput.value;
+      if (endInput.value) startInput.max = endInput.value;
+
+      // When start date changes, update min for end date
+      startInput.addEventListener('change', () => {
+        endInput.min = startInput.value;
+        // Ensure current end is not before new start
+        if (endInput.value && endInput.value < startInput.value) {
+          endInput.value = startInput.value;
+        }
+      });
+      // When end date changes, update max for start date
+      endInput.addEventListener('change', () => {
+        startInput.max = endInput.value;
+        if (startInput.value && startInput.value > endInput.value) {
+          startInput.value = endInput.value;
+        }
+      });
+
+      document.querySelector('nav button[data-target="config"]').click();
+    })();
+    document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{ document.querySelectorAll('section').forEach(s=>s.classList.remove('active')); document.getElementById(b.dataset.target).classList.add('active'); if(b.dataset.target==='day') loadEntries(); if(b.dataset.target==='overview') renderOverview(); });
+  </script>
+</body>
+</html>
