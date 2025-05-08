@@ -6,6 +6,7 @@
     <link rel="icon" href="favicon.png" type="image/png">
     <link rel="apple-touch-icon" sizes="180x180" href="favicon.png">
     <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Zeiterfassung Lehrpersonen</title>
     <link
@@ -223,8 +224,11 @@
           class="form-control mb-3"
         />
       <h3>Löschen</h3>
-      <button id="clear-entries-btn" class="btn btn-danger">
+      <button id="clear-entries-btn" class="btn btn-danger mb-3">
         Alle Einträge löschen
+      </button>
+      <button id="reset-db-btn" class="btn btn-warning">
+        Datenbank zurücksetzen
       </button>
       
     </section>
@@ -323,11 +327,13 @@
             db = req.result;
             if (!db.objectStoreNames.contains(STORE_CONFIG))
               db.createObjectStore(STORE_CONFIG, { keyPath: "id" });
-            if (!db.objectStoreNames.contains(STORE_ENTRIES))
-              db.createObjectStore(STORE_ENTRIES, {
+            if (!db.objectStoreNames.contains(STORE_ENTRIES)) {
+              const es = db.createObjectStore(STORE_ENTRIES, {
                 keyPath: "id",
                 autoIncrement: true,
               });
+              es.createIndex('by_date', 'date', { unique: false });
+            }
             if (!db.objectStoreNames.contains(STORE_CATEGORIES))
               db.createObjectStore(STORE_CATEGORIES, {
                 keyPath: "id",
@@ -416,109 +422,130 @@
         // Display the provided date
         dateEl.textContent = currentDate.toLocaleDateString("de-DE");
 
+        // Use date index to fetch only entries for currentDate, fallback to scan if index missing
+        const isoDate = formatDateISO(currentDate);
         entriesList.innerHTML = "";
         let totalMinutes = 0;
-        tx(STORE_ENTRIES).openCursor().onsuccess = (e) => {
-          const cur = e.target.result;
-          if (cur) {
-            const en = cur.value;
-            if (en.date === formatDateISO(currentDate)) {
-              totalMinutes += en.minutes;
-              const li = document.createElement("li");
-              const editLabel = document.createElement("div");
-              editLabel.className = "label edit-label";
-              editLabel.textContent = "Edit";
-              const deleteLabel = document.createElement("div");
-              deleteLabel.className = "label delete-label";
-              deleteLabel.textContent = "Delete";
-              const contentDiv = document.createElement("div");
-              contentDiv.className = "content";
-              contentDiv.textContent = `${(en.minutes / 60).toFixed(2)}h | ${
-                en.category
-              } | ${en.note}`;
-              li.appendChild(editLabel);
-              li.appendChild(deleteLabel);
-              li.appendChild(contentDiv);
-              let touchStartX = null;
-              contentDiv.addEventListener("touchstart", (ev) => {
-                if (ev.touches && ev.touches.length === 1)
-                  touchStartX = ev.touches[0].clientX;
-              });
-              contentDiv.addEventListener("touchmove", (ev) => {
-                if (ev.touches && ev.touches.length === 1) {
-                  const deltaX = ev.touches[0].clientX - touchStartX;
-                  contentDiv.style.transform = `translateX(${deltaX}px)`;
-                  if (deltaX > 0) {
-                    editLabel.style.opacity = "1";
-                    deleteLabel.style.opacity = "0";
-                  } else if (deltaX < 0) {
-                    deleteLabel.style.opacity = "1";
-                    editLabel.style.opacity = "0";
-                  }
+
+        const store = db.transaction(STORE_ENTRIES, "readonly").objectStore(STORE_ENTRIES);
+        let fetchPromise;
+
+        if (store.indexNames.contains("by_date")) {
+          // Use index if available
+          const idx = store.index("by_date");
+          const range = IDBKeyRange.only(isoDate);
+          fetchPromise = new Promise(res => {
+            idx.getAll(range).onsuccess = e => res(e.target.result || []);
+          });
+        } else {
+          // Fallback: scan all entries and filter
+          fetchPromise = new Promise(res => {
+            const results = [];
+            store.openCursor().onsuccess = e => {
+              const cursor = e.target.result;
+              if (cursor) {
+                if (cursor.value.date === isoDate) results.push(cursor.value);
+                cursor.continue();
+              } else {
+                res(results);
+              }
+            };
+          });
+        }
+
+        fetchPromise.then(results => {
+          results.forEach(en => {
+            totalMinutes += en.minutes;
+            // Create list item as before...
+            const li = document.createElement("li");
+            const editLabel = document.createElement("div");
+            editLabel.className = "label edit-label";
+            editLabel.textContent = "Edit";
+            const deleteLabel = document.createElement("div");
+            deleteLabel.className = "label delete-label";
+            deleteLabel.textContent = "Delete";
+            const contentDiv = document.createElement("div");
+            contentDiv.className = "content";
+            contentDiv.textContent = `${(en.minutes / 60).toFixed(2)}h | ${en.category} | ${en.note}`;
+            li.appendChild(editLabel);
+            li.appendChild(deleteLabel);
+            li.appendChild(contentDiv);
+            let touchStartX = null;
+            contentDiv.addEventListener("touchstart", (ev) => {
+              if (ev.touches && ev.touches.length === 1)
+                touchStartX = ev.touches[0].clientX;
+            });
+            contentDiv.addEventListener("touchmove", (ev) => {
+              if (ev.touches && ev.touches.length === 1) {
+                const deltaX = ev.touches[0].clientX - touchStartX;
+                contentDiv.style.transform = `translateX(${deltaX}px)`;
+                if (deltaX > 0) {
+                  editLabel.style.opacity = "1";
+                  deleteLabel.style.opacity = "0";
+                } else if (deltaX < 0) {
+                  deleteLabel.style.opacity = "1";
+                  editLabel.style.opacity = "0";
                 }
-              });
-              contentDiv.addEventListener("touchend", (ev) => {
-                if (
-                  touchStartX !== null &&
-                  ev.changedTouches &&
-                  ev.changedTouches.length === 1
-                ) {
-                  const deltaX = ev.changedTouches[0].clientX - touchStartX;
-                  const id = en.id;
-                  if (deltaX < -50) {
-                    tx(STORE_ENTRIES, "readwrite").delete(id);
-                    loadEntries(currentDate);
-                  } else if (deltaX > 50) {
-                    tx(STORE_ENTRIES).get(id).onsuccess = (evGet) => {
-                      const entry = evGet.target.result;
-                      if (entry) {
-                        document.getElementById("entryModalLabel").textContent =
-                          "Eintrag bearbeiten";
-                        document.getElementById("modal-entry-id").value =
-                          entry.id;
-                        document.getElementById("modal-hours").value =
-                          Math.floor(entry.minutes / 60);
-                        document.getElementById("modal-minutes").value =
-                          entry.minutes % 60;
-                        document.getElementById("modal-category").value =
-                          entry.category;
-                        document.getElementById("modal-note").value =
-                          entry.note;
-                        bootstrap.Modal.getOrCreateInstance(
-                          document.getElementById("entryModal")
-                        ).show();
-                      }
-                    };
-                  }
+              }
+            });
+            contentDiv.addEventListener("touchend", (ev) => {
+              if (
+                touchStartX !== null &&
+                ev.changedTouches &&
+                ev.changedTouches.length === 1
+              ) {
+                const deltaX = ev.changedTouches[0].clientX - touchStartX;
+                const id = en.id;
+                if (deltaX < -50) {
+                  tx(STORE_ENTRIES, "readwrite").delete(id);
+                  loadEntries(currentDate);
+                } else if (deltaX > 50) {
+                  tx(STORE_ENTRIES).get(id).onsuccess = (evGet) => {
+                    const entry = evGet.target.result;
+                    if (entry) {
+                      document.getElementById("entryModalLabel").textContent =
+                        "Eintrag bearbeiten";
+                      document.getElementById("modal-entry-id").value =
+                        entry.id;
+                      document.getElementById("modal-hours").value =
+                        Math.floor(entry.minutes / 60);
+                      document.getElementById("modal-minutes").value =
+                        entry.minutes % 60;
+                      document.getElementById("modal-category").value =
+                        entry.category;
+                      document.getElementById("modal-note").value =
+                        entry.note;
+                      bootstrap.Modal.getOrCreateInstance(
+                        document.getElementById("entryModal")
+                      ).show();
+                    }
+                  };
                 }
-                setTimeout(() => {
-                  contentDiv.style.transform = "translateX(0px)";
-                }, 200);
-                editLabel.style.opacity = "0";
-                deleteLabel.style.opacity = "0";
-                touchStartX = null;
-              });
-              li.addEventListener("touchstart", (ev) => {
-                if (ev.touches && ev.touches.length === 1)
-                  touchStartX = ev.touches[0].clientX;
-              });
-              li.addEventListener("touchend", (ev) => {
-                setTimeout(() => {
-                  contentDiv.style.transform = "translateX(0px)";
-                }, 200);
-                editLabel.style.opacity = "0";
-                deleteLabel.style.opacity = "0";
-                touchStartX = null;
-              });
-              entriesList.appendChild(li);
-            }
-            cur.continue();
-          } else {
-            document.querySelector("#day .total").textContent = `${Math.floor(
-              totalMinutes / 60
-            )}h ${totalMinutes % 60}min`;
-          }
-        };
+              }
+              setTimeout(() => {
+                contentDiv.style.transform = "translateX(0px)";
+              }, 200);
+              editLabel.style.opacity = "0";
+              deleteLabel.style.opacity = "0";
+              touchStartX = null;
+            });
+            li.addEventListener("touchstart", (ev) => {
+              if (ev.touches && ev.touches.length === 1)
+                touchStartX = ev.touches[0].clientX;
+            });
+            li.addEventListener("touchend", (ev) => {
+              setTimeout(() => {
+                contentDiv.style.transform = "translateX(0px)";
+              }, 200);
+              editLabel.style.opacity = "0";
+              deleteLabel.style.opacity = "0";
+              touchStartX = null;
+            });
+            entriesList.appendChild(li);
+          });
+          // After populating
+          document.querySelector("#day .total").textContent = `${Math.floor(totalMinutes/60)}h ${totalMinutes%60}min`;
+        });
       }
 
       function renderOverview() {
@@ -622,6 +649,21 @@
             const d = new Date(parts.reverse().join("-"));
             loadEntries(d);
           }
+        }
+      }
+
+      function resetDB() {
+        if (confirm("Möchtest du wirklich die gesamte Datenbank löschen?")) {
+          // Close any open connections before deletion
+          if (db) db.close();
+          const deleteRequest = indexedDB.deleteDatabase(DB_NAME);
+          deleteRequest.onsuccess = () => {
+            // Reload the page to reinitialize
+            location.reload();
+          };
+          deleteRequest.onerror = () => {
+            alert("Fehler beim Löschen der Datenbank.");
+          };
         }
       }
 
@@ -788,7 +830,7 @@
         endISO
       ) {
         const start = new Date(startISO),
-          end = new Date(endISO);
+        end = new Date(endISO);
         const days = Math.floor((end - start) / (1000 * 60 * 60 * 24)) + 1;
         let total = yearHours * (employmentPercent / 100) * (days / 365);
         // Urlaubstage basierend auf Alter abziehen (8.4h pro Tag)
@@ -842,6 +884,7 @@
           document.getElementById("export-btn").onclick = exportCSV;
           document.getElementById("clear-entries-btn").onclick = clearDB;
           document.getElementById("import-input").onchange = importDB;
+          document.getElementById("reset-db-btn").onclick = resetDB;
         })();
       });
     </script>
