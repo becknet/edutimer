@@ -15,7 +15,6 @@ Eine leichte Web-App zur lokalen Zeiterfassung, optimiert für Lehrpersonen. Nut
 - **Kategorien**
   - Standardkategorien: A, B, C, D, E, EA
   - Eigene Kategorien anlegen und löschen
-  - Lösch-Button rechts ausgerichtet
 
 - **Tagesansicht**
   - Navigation per ‹–› Buttons
@@ -29,6 +28,7 @@ Eine leichte Web-App zur lokalen Zeiterfassung, optimiert für Lehrpersonen. Nut
   - IST/Stunden- und Prozentwerte (A+B, C+D+E, EA separat)
   - CSV-Export & CSV-Import
   - Button zum Löschen aller Einträge (Konfiguration & Kategorien bleiben erhalten)
+  - Löschen der ganzen DB
 
 - **PWA-Support**
   - `favicon.png` als App-Icon
@@ -37,7 +37,12 @@ Eine leichte Web-App zur lokalen Zeiterfassung, optimiert für Lehrpersonen. Nut
 
 ---
 
-## Installation & Nutzung
+## Nutzung über URL
+https://becknet.github.io/edutimer/
+
+---
+
+## Installation & Nutzung lokal
 
 1. **Klonen oder Herunterladen**  
    Kopiere den Ordner `EduTimer` in Dein Web-Server-Verzeichnis (z.B. `htdocs`, `www`).
@@ -71,16 +76,13 @@ Eine leichte Web-App zur lokalen Zeiterfassung, optimiert für Lehrpersonen. Nut
 
 ---
 
-## Entwickeln & Anpassen
+## Datenschutz
 
-- **HTML**: Struktur in `index.html`  
-- **CSS**: Anpassungen im `<style>`-Block (Bootstrap-Utilities vorhanden)  
-- **JS**:  
-  - `init*()`-Funktionen für Struktur  
-  - Helper: `formatDateISO()`, `calculateRequiredHours()`, `calculateGroupSums()`  
-  - Event-Binding im `DOMContentLoaded`  
+Daten werden nur auf dem lokalen Gerät gespeichert.
+Du bist für die Sicherung deiner Daten -> Export CSV selbst verantwortlich.
+Der Author lehnt jede Haftung für den Verluste deiner Daten ab.
 
-Einzelne Bereiche einfach in den jeweiligen Funktionen erweitern oder anpassen.
+
 
 ---
 
