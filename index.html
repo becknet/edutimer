@@ -320,6 +320,8 @@
 
       // IndexedDB instance
       let db;
+      // Current selected date for day view
+      let currentDate = new Date();
       function openDB() {
         return new Promise((res, rej) => {
           const req = indexedDB.open(DB_NAME, DB_VERSION);
@@ -741,9 +743,7 @@
       }
 
       function initDayView() {
-        let currentDate = new Date();
-        const dateEl = document.getElementById("current-date"),
-          entriesList = document.getElementById("entries-list");
+        // reuse global currentDate
         function update() {
           loadEntries(currentDate);
         }
@@ -776,15 +776,7 @@
               Number(document.getElementById("modal-minutes").value);
             if (mins <= 0) return alert("Bitte Zeit angeben");
             const entry = {
-              date: formatDateISO(
-                new Date(
-                  document
-                    .getElementById("current-date")
-                    .textContent.split(".")
-                    .reverse()
-                    .join("-")
-                )
-              ),
+              date: formatDateISO(currentDate),
               minutes: mins,
               category: document.getElementById("modal-category").value,
               note: document.getElementById("modal-note").value.trim(),
@@ -795,7 +787,7 @@
             bootstrap.Modal.getInstance(
               document.getElementById("entryModal")
             ).hide();
-            loadEntries(new Date(entry.date));
+            loadEntries(currentDate);
           });
       }
 
