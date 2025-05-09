@@ -518,11 +518,16 @@
               (it) => it.date >= c.start && it.date <= c.end
             );
             const sums = calculateGroupSums(entries);
+            // Total actual minutes across both groups for IST percentage
+            const ABCDETotalMinutes = sums["A+B"] + sums["C+D+E"];
             Object.entries(groups).forEach(([label, ratio]) => {
               const tr = document.createElement("tr");
               const sollHours = total * ratio;
               const istHours = sums[label] / 60;
-              const istPercent = (istHours / total) * 100;
+              // Compute IST percent relative to total actual hours
+              const istPercent = ABCDETotalMinutes
+                ? (sums[label] / ABCDETotalMinutes) * 100
+                : 0;
               tr.innerHTML = `
             <td>${label}</td>
             <td>${sollHours.toFixed(2)}</td>
