@@ -24,7 +24,7 @@
     <link rel="stylesheet" href="css/style.css" />
   </head>
   <body>
-    <header>Zeiterfassung Lehrpersonen</header>
+    <header><h2>Zeiterfassung Lehrpersonen</h2></header>
     <nav class="d-flex justify-content-center gap-3 mt-3 mb-4">
       <button class="btn btn-outline-primary" data-target="config">
         Konfiguration
@@ -95,6 +95,24 @@
         </button>
       </form>
       <ul class="list" id="cat-list"></ul>
+      <h3>Export:</h3>
+      <button id="export-btn" class="btn btn-outline-secondary mb-3">
+        Export als CSV
+      </button>
+      <h3>Import:</h3>
+      <input
+        type="file"
+        id="import-input"
+        accept=".csv"
+        class="form-control mb-3"
+      />
+      <h3>Löschen</h3>
+      <button id="clear-entries-btn" class="btn btn-danger mb-3">
+        Alle Einträge löschen
+      </button>
+      <button id="reset-db-btn" class="btn btn-warning">
+        Datenbank zurücksetzen
+      </button>
     </section>
 
     <section id="day">
@@ -121,8 +139,9 @@
       </div>
     </section>
 
-    <section id="overview">
+   <section id="overview">
       <h2>Übersicht</h2>
+      <div id="overview-period" class="mb-3 fst-italic"></div>
       <table class="table table-striped mb-3">
         <thead>
           <tr>
@@ -146,24 +165,6 @@
         </thead>
         <tbody id="cat-overview-body"></tbody>
       </table>
-      <h3>Export:</h3>
-      <button id="export-btn" class="btn btn-outline-secondary mb-3">
-        Export als CSV
-      </button>
-      <h3>Import:</h3>
-      <input
-        type="file"
-        id="import-input"
-        accept=".csv"
-        class="form-control mb-3"
-      />
-      <h3>Löschen</h3>
-      <button id="clear-entries-btn" class="btn btn-danger mb-3">
-        Alle Einträge löschen
-      </button>
-      <button id="reset-db-btn" class="btn btn-warning">
-        Datenbank zurücksetzen
-      </button>
     </section>
 
     <!-- Entry Modal -->
@@ -505,6 +506,11 @@
         tx(STORE_CONFIG).get(1).onsuccess = (e) => {
           const c = e.target.result;
           if (!c) return;
+          // Show the configured period in dd.mm.yyyy
+          const startLocal = new Date(c.start).toLocaleDateString('de-DE');
+          const endLocal = new Date(c.end).toLocaleDateString('de-DE');
+          document.getElementById('overview-period').textContent =
+            `Zeitraum: ${startLocal} bis ${endLocal}`;
           const total = calculateRequiredHours(
             c.yearHours,
             c.employment,
