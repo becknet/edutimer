@@ -24,19 +24,21 @@
     <link rel="stylesheet" href="css/style.css" />
   </head>
   <body>
+    <!--Navigation-->
     <header><h2>Zeiterfassung Lehrpersonen</h2></header>
     <nav class="d-flex justify-content-center gap-3 mt-3 mb-4">
-      <button class="btn btn-outline-primary" data-target="config">
-        Konfiguration
-      </button>
       <button class="btn btn-outline-primary" data-target="day">
         Tagesansicht
       </button>
       <button class="btn btn-outline-primary" data-target="overview">
-        Übersicht
+        Statistik
+      </button>
+      <button class="btn btn-outline-primary" data-target="config">
+        Konfiguration
       </button>
     </nav>
 
+    <!--Konfiguration-->
     <section id="config">
       <h2>Konfiguration</h2>
       <form id="config-form" class="mb-3">
@@ -76,8 +78,10 @@
         <input class="form-control" type="date" id="year-start" required />
         <label class="form-label">Ende Schuljahr:</label>
         <input class="form-control" type="date" id="year-end" required />
-        <button type="submit" class="btn btn-primary">Speichern</button>
+        <button type="submit" class="btn btn-success">Speichern</button>
       </form>
+
+      <!-- Kategorien-->
       <h3>Kategorien verwalten</h3>
       <form id="cat-form" class="mb-3">
         <label class="form-label">Code:</label>
@@ -95,32 +99,35 @@
         </button>
       </form>
       <ul class="list" id="cat-list"></ul>
-      <h3>Export:</h3>
-      <button id="export-btn" class="btn btn-outline-secondary mb-3">
+      
+      <!-- Import / Export-->
+      <h3>Export</h3>
+      <button id="export-btn" class="btn btn-success mb-3">
         Export als CSV
       </button>
-      <h3>Import:</h3>
+      <h3>Import</h3>
       <input
         type="file"
         id="import-input"
         accept=".csv"
         class="form-control mb-3"
       />
+      <!--Löschen-->
       <h3>Löschen</h3>
-      <button id="clear-entries-btn" class="btn btn-danger mb-3">
+      <button id="clear-entries-btn" class="btn btn-warning mb-3">
         Alle Einträge löschen
       </button>
-      <button id="reset-db-btn" class="btn btn-warning">
+      <button id="reset-db-btn" class="btn btn-danger">
         Datenbank zurücksetzen
       </button>
     </section>
 
     <section id="day">
       <div
-        class="day-nav d-flex justify-content-center align-items-center gap-3"
+        class="day-nav d-flex justify-content-center align-items-center gap-4"
       >
         <button id="prev-day" class="btn btn-outline-primary">←</button>
-        <h2 id="current-date"></h2>
+        <h2 id="current-date" class="pt-3"></h2>
         <button id="next-day" class="btn btn-outline-primary">→</button>
       </div>
       <div class="text-center mb-3 mt-3">
@@ -176,12 +183,12 @@
       aria-hidden="true"
     >
       <div class="modal-dialog">
-        <div class="modal-content bg-dark text-white">
+        <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title" id="entryModalLabel">Eintrag</h5>
             <button
               type="button"
-              class="btn-close btn-close-white"
+              class="btn-close btn-close-black"
               data-bs-dismiss="modal"
               aria-label="Schließen"
             ></button>
@@ -190,7 +197,7 @@
             <form id="modal-entry-form">
               <input type="hidden" id="modal-entry-id" />
               <div class="mb-3">
-                <label class="form-label">Stunden</label>
+                <label class="form-label">Stunden:</label>
                 <input
                   type="number"
                   min="0"
@@ -203,7 +210,7 @@
                 />
               </div>
               <div class="mb-3">
-                <label class="form-label">Minuten</label>
+                <label class="form-label">Minuten:</label>
                 <input
                   type="number"
                   min="0"
@@ -217,7 +224,7 @@
                 />
               </div>
               <div class="mb-3">
-                <label class="form-label">Kategorie</label>
+                <label class="form-label">Kategorie:</label>
                 <select
                   id="modal-category"
                   class="form-select"
@@ -225,12 +232,15 @@
                 ></select>
               </div>
               <div class="mb-3">
-                <label class="form-label">Bemerkung</label>
+                <label class="form-label">Bemerkung:</label>
                 <input type="text" class="form-control" id="modal-note" />
               </div>
             </form>
           </div>
           <div class="modal-footer">
+            <button type="button" class="btn btn-success" id="save-entry-btn">
+              Speichern
+            </button>
             <button
               type="button"
               class="btn btn-secondary"
@@ -238,9 +248,7 @@
             >
               Abbrechen
             </button>
-            <button type="button" class="btn btn-primary" id="save-entry-btn">
-              Speichern
-            </button>
+            
           </div>
         </div>
       </div>
@@ -599,7 +607,7 @@
       }
 
       function clearDB() {
-        if (confirm("Möchtest du wirklich alle Einträge löschen?")) {
+        if (confirm("Möchtest du wirklich alle Einträge löschen? Deine Einstellungen bleiben erhalten.")) {
           const store = tx(STORE_ENTRIES, "readwrite");
           store.clear();
           // Refresh views
@@ -618,7 +626,7 @@
       }
 
       function resetDB() {
-        if (confirm("Möchtest du wirklich die gesamte Datenbank löschen?")) {
+        if (confirm("Möchtest du wirklich die gesamte Datenbank löschen? Damit werden alle Einträge und die Einstellungen gelöscht.")) {
           // Close any open connections before deletion
           if (db) db.close();
           const deleteRequest = indexedDB.deleteDatabase(DB_NAME);
@@ -841,10 +849,10 @@
               startInput.value = endInput.value;
             }
           });
-          document.getElementById("export-btn").onclick = exportCSV;
-          document.getElementById("clear-entries-btn").onclick = clearDB;
-          document.getElementById("import-input").onchange = importDB;
-          document.getElementById("reset-db-btn").onclick = resetDB;
+          document.getElementById("export-btn").addEventListener('click', exportCSV);
+          document.getElementById("clear-entries-btn").addEventListener('click', clearDB);
+          document.getElementById("import-input").addEventListener('click', importDB);
+          document.getElementById("reset-db-btn").addEventListener('click', resetDB);
         })();
       });
     </script>
