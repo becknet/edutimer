@@ -76,4 +76,9 @@ td {
   z-index: 2;
   position: relative;
 }
+
+/* Left-align Bootstrap tooltip text */
+.tooltip-inner {
+  text-align: left;
+}
 /* Day navigation centered */
