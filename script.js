@@ -625,4 +625,10 @@ document.addEventListener("DOMContentLoaded", () => {
             .getElementById("reset-db-btn")
             .addEventListener("click", resetDB);
     })();
+    var tooltipTriggerList = [].slice.call(
+        document.querySelectorAll('[data-bs-toggle="tooltip"]')
+    );
+    tooltipTriggerList.forEach(function (el) {
+        new bootstrap.Tooltip(el, { html: true });
+    });
 });
