@@ -7,6 +7,8 @@ const STORE_CONFIG = "config";
 const STORE_ENTRIES = "entries";
 const STORE_CATEGORIES = "categories";
 
+const defaultCodes = ["A", "B", "C", "D", "E", "EA"];
+
 // IndexedDB instance
 let db;
 // Current selected date for day view
@@ -66,6 +68,43 @@ async function seedCategories() {
     }
 }
 
+// --- Initialization functions ---
+function initCategories() {
+    const catForm = document.getElementById("cat-form"),
+        catList = document.getElementById("cat-list"),
+        modalCatSelect = document.getElementById("modal-category");
+    catForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const codeInput = document.getElementById("cat-code");
+        const nameInput = document.getElementById("cat-name");
+        const code = codeInput.value.trim();
+        const name = nameInput.value.trim();
+        // Validate non-empty
+        if (!code || !name) {
+            alert("Bitte Code und Name eingeben.");
+            return;
+        }
+
+        // Check for existing custom categories
+        tx(STORE_CATEGORIES).getAll().onsuccess = (event) => {
+            const allCats = event.target.result;
+            if (allCats.some((cat) => cat.code === code)) {
+                alert(
+                    `Eine Kategorie mit dem Code "${code}" existiert bereits.`
+                );
+                codeInput.value = "";
+                nameInput.value = "";
+                return;
+            }
+            // Add new category
+            tx(STORE_CATEGORIES, "readwrite").add({ code, name });
+            catForm.reset();
+            loadCategories();
+        };
+    });
+    loadCategories();
+}
+
 // kategorien laden und anzeigen
 function loadCategories() {
     const catList = document.getElementById("cat-list");
@@ -76,22 +115,29 @@ function loadCategories() {
         const cur = e.target.result;
         if (cur) {
             const c = cur.value;
-            const li = document.createElement("li");
-            li.classList.add(
-                "d-flex",
-                "justify-content-between",
-                "align-items-center"
-            );
-            li.textContent = `${c.code} - ${c.name}`;
-            const del = document.createElement("button");
-            del.innerHTML = '<i class="bi-trash"></i>';
-            del.className = "btn btn-outline-danger btn-sm";
-            del.onclick = () => {
-                tx(STORE_CATEGORIES, "readwrite").delete(c.id);
-                loadCategories();
-            };
-            li.appendChild(del);
-            catList.appendChild(li);
+            // Only display custom categories (not default) in config list
+            if (!defaultCodes.includes(c.code)) {
+                const li = document.createElement("li");
+                li.classList.add(
+                    "d-flex",
+                    "justify-content-between",
+                    "align-items-center"
+                );
+                li.textContent = `${c.code} - ${c.name}`;
+
+                const del = document.createElement("i");
+                del.className = "bi bi-trash delete-btn text-danger ms-2";
+                del.title = "Löschen";
+                del.addEventListener("click", () => {
+                    if (confirm("Kategorie löschen?")) {
+                        tx(STORE_CATEGORIES, "readwrite").delete(c.id);
+                        loadCategories();
+                    }
+                });
+                li.appendChild(del);
+                catList.appendChild(li);
+            }
+            // All categories (default and custom) in modal select
             const modalOpt = document.createElement("option");
             modalOpt.value = c.code;
             modalOpt.textContent = `${c.code} ${c.name}`;
@@ -163,36 +209,49 @@ function loadEntries(currentDate) {
             totalMinutes += en.minutes;
             const li = document.createElement("li");
             // Make each <li> a flex container, right-align icons
-            li.classList.add("d-flex", "justify-content-between", "align-items-center");
+            li.classList.add(
+                "d-flex",
+                "justify-content-between",
+                "align-items-center"
+            );
             const contentDiv = document.createElement("div");
             contentDiv.className = "content";
-            contentDiv.textContent = `${(en.minutes / 60).toFixed(2)}h | ${en.category} | ${en.note}`;
+            contentDiv.textContent = `${(en.minutes / 60).toFixed(2)}h | ${
+                en.category
+            } | ${en.note}`;
 
             // Create edit and delete icon buttons
-            const editBtn = document.createElement('i');
-            editBtn.className = 'bi bi-pencil-square edit-btn text-primary ms-2';
-            editBtn.title = 'Bearbeiten';
-            const deleteBtn = document.createElement('i');
-            deleteBtn.className = 'bi bi-trash delete-btn text-danger ms-2';
-            deleteBtn.title = 'Löschen';
+            const editBtn = document.createElement("i");
+            editBtn.className =
+                "bi bi-pencil-square edit-btn text-primary ms-2";
+            editBtn.title = "Bearbeiten";
+            const deleteBtn = document.createElement("i");
+            deleteBtn.className = "bi bi-trash delete-btn text-danger ms-2";
+            deleteBtn.title = "Löschen";
 
             // Click handlers
-            editBtn.addEventListener('click', () => {
-              // Populate modal for editing
-              document.getElementById("entryModalLabel").textContent = "Eintrag bearbeiten";
-              document.getElementById("modal-entry-id").value = en.id;
-              document.getElementById("modal-hours").value = Math.floor(en.minutes / 60);
-              document.getElementById("modal-minutes").value = en.minutes % 60;
-              document.getElementById("modal-category").value = en.category;
-              document.getElementById("modal-note").value = en.note;
-              bootstrap.Modal.getOrCreateInstance(document.getElementById("entryModal")).show();
+            editBtn.addEventListener("click", () => {
+                // Populate modal for editing
+                document.getElementById("entryModalLabel").textContent =
+                    "Eintrag bearbeiten";
+                document.getElementById("modal-entry-id").value = en.id;
+                document.getElementById("modal-hours").value = Math.floor(
+                    en.minutes / 60
+                );
+                document.getElementById("modal-minutes").value =
+                    en.minutes % 60;
+                document.getElementById("modal-category").value = en.category;
+                document.getElementById("modal-note").value = en.note;
+                bootstrap.Modal.getOrCreateInstance(
+                    document.getElementById("entryModal")
+                ).show();
             });
 
-            deleteBtn.addEventListener('click', () => {
-              if (confirm('Eintrag löschen?')) {
-                tx(STORE_ENTRIES, 'readwrite').delete(en.id);
-                loadEntries(currentDate);
-              }
+            deleteBtn.addEventListener("click", () => {
+                if (confirm("Eintrag löschen?")) {
+                    tx(STORE_ENTRIES, "readwrite").delete(en.id);
+                    loadEntries(currentDate);
+                }
             });
 
             // Content on the left
@@ -399,24 +458,6 @@ function importCSV() {
     reader.readAsText(file);
 }
 
-// --- Initialization functions ---
-function initCategories() {
-    const catForm = document.getElementById("cat-form"),
-        catList = document.getElementById("cat-list"),
-        modalCatSelect = document.getElementById("modal-category");
-    catForm.addEventListener("submit", (e) => {
-        e.preventDefault();
-        const cat = {
-            code: document.getElementById("cat-code").value.trim(),
-            name: document.getElementById("cat-name").value.trim(),
-        };
-        tx(STORE_CATEGORIES, "readwrite").add(cat);
-        catForm.reset();
-        loadCategories();
-    });
-    loadCategories();
-}
-
 function initConfig() {
     document.getElementById("config-form").addEventListener("submit", (e) => {
         e.preventDefault();
@@ -566,10 +607,10 @@ document.addEventListener("DOMContentLoaded", () => {
             .addEventListener("click", exportCSV);
         document
             .getElementById("import-input")
-            .addEventListener("change", function(){
+            .addEventListener("change", function () {
                 importCSV();
-                alert('CSV wurde erfogreich importiert.');
-            } );
+                alert("CSV wurde erfogreich importiert.");
+            });
         document
             .getElementById("clear-entries-btn")
             .addEventListener("click", clearDB);

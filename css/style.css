@@ -46,7 +46,7 @@ td {
 }
 
 /* Highlight entries on hover */
-#entries-list li:hover {
+#entries-list li:hover, #cat-list li:hover {
   background-color: #f9f9f9;
 }
 /* Day navigation centered */
