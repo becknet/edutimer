@@ -17,15 +17,15 @@ Eine leichte Web-App zur lokalen Zeiterfassung, optimiert für Lehrpersonen. Nut
   - Eigene Kategorien anlegen und löschen
 
 - **Tagesansicht**
-  - Navigation per ‹–› Buttons
-  - Einträge nur für den ausgewählten Tag
+  - Navigation der Tage per ‹–› Buttons
+  - Einträge werden jeweils zugehörig zum ausgewählten Tag angezeigt
   - „Neuer Eintrag“ und Bearbeitung per Bootstrap-Modal
   - Swipe-Gesten: links wischen = löschen, rechts wischen = bearbeiten
   - Tages-Summe (Stunden & Minuten)
 
 - **Übersicht**
   - SOLL/Stunden- und Prozentwerte (A+B, C+D+E)
-  - IST/Stunden- und Prozentwerte (A+B, C+D+E, EA separat)
+  - IST/Stunden- und Prozentwerte (A,B,C,D,E,EA,eigene Kategorien)
   - CSV-Export & CSV-Import
   - Button zum Löschen aller Einträge (Konfiguration & Kategorien bleiben erhalten)
   - Löschen der ganzen DB
@@ -39,6 +39,12 @@ Eine leichte Web-App zur lokalen Zeiterfassung, optimiert für Lehrpersonen. Nut
 
 ## Nutzung über URL
 https://becknet.github.io/edutimer/
+
+---
+
+## Als App speichern ##
+   - In Safari (iOS): Teilen → Zum Home-Bildschirm.  
+   - In Chrome (Android): Menü → Zum Startbildschirm.
 
 ---
 
@@ -60,11 +66,7 @@ https://becknet.github.io/edutimer/
    - Übersicht zeigt SOLL/IST.  
    - Export als CSV.  
    - Import über CSV-Datei.
-
-6. **Als App speichern**  
-   - In Safari (iOS): Teilen → Zum Home-Bildschirm.  
-   - In Chrome (Android): Menü → Zum Startbildschirm.
-
+   
 ---
 
 ## Tech-Stack
@@ -81,8 +83,6 @@ https://becknet.github.io/edutimer/
 Daten werden nur auf dem lokalen Gerät gespeichert.
 Du bist für die Sicherung deiner Daten -> Export CSV selbst verantwortlich.
 Der Author lehnt jede Haftung für den Verluste deiner Daten ab.
-
-
 
 ---
 
