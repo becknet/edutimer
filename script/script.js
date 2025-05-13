@@ -565,14 +565,10 @@ function calculateRequiredHours(
         end = new Date(endISO);
     const days = Math.floor((end - start) / (1000 * 60 * 60 * 24)) + 1;
     let total = yearHours * (employmentPercent / 100) * (days / 365);
-    // Urlaubstage basierend auf Alter abziehen (8.4h pro Tag)
-    if (age < 50) {
-        total -= 25 * 8.4;
-    } else if (age < 60) {
-        total -= 27 * 8.4;
-    } else {
-        total -= 30 * 8.4;
-    }
+    // Urlaubstage basierend auf Alter abziehen (8.4h pro Tag), skaliert mit Anstellungsgrad
+    const vacDays = age < 50 ? 25 : age < 60 ? 27 : 30;
+    const vacHours = vacDays * 8.4 * (employmentPercent / 100);
+    total -= vacHours;
     return total;
 }
 
