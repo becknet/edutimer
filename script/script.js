@@ -161,96 +161,48 @@ function loadEntries(currentDate) {
     fetchPromise.then((results) => {
         results.forEach((en) => {
             totalMinutes += en.minutes;
-            // Create list item as before...
             const li = document.createElement("li");
-            const editLabel = document.createElement("div");
-            editLabel.className = "label edit-label";
-            editLabel.textContent = "Edit";
-            const deleteLabel = document.createElement("div");
-            deleteLabel.className = "label delete-label";
-            deleteLabel.textContent = "Delete";
+            // Make each <li> a flex container, right-align icons
+            li.classList.add("d-flex", "justify-content-between", "align-items-center");
             const contentDiv = document.createElement("div");
             contentDiv.className = "content";
-            contentDiv.textContent = `${(en.minutes / 60).toFixed(2)}h | ${
-                en.category
-            } | ${en.note}`;
-            li.appendChild(editLabel);
-            li.appendChild(deleteLabel);
+            contentDiv.textContent = `${(en.minutes / 60).toFixed(2)}h | ${en.category} | ${en.note}`;
+
+            // Create edit and delete icon buttons
+            const editBtn = document.createElement('i');
+            editBtn.className = 'bi bi-pencil-square edit-btn text-primary ms-2';
+            editBtn.title = 'Bearbeiten';
+            const deleteBtn = document.createElement('i');
+            deleteBtn.className = 'bi bi-trash delete-btn text-danger ms-2';
+            deleteBtn.title = 'Löschen';
+
+            // Click handlers
+            editBtn.addEventListener('click', () => {
+              // Populate modal for editing
+              document.getElementById("entryModalLabel").textContent = "Eintrag bearbeiten";
+              document.getElementById("modal-entry-id").value = en.id;
+              document.getElementById("modal-hours").value = Math.floor(en.minutes / 60);
+              document.getElementById("modal-minutes").value = en.minutes % 60;
+              document.getElementById("modal-category").value = en.category;
+              document.getElementById("modal-note").value = en.note;
+              bootstrap.Modal.getOrCreateInstance(document.getElementById("entryModal")).show();
+            });
+
+            deleteBtn.addEventListener('click', () => {
+              if (confirm('Eintrag löschen?')) {
+                tx(STORE_ENTRIES, 'readwrite').delete(en.id);
+                loadEntries(currentDate);
+              }
+            });
+
+            // Content on the left
             li.appendChild(contentDiv);
-            let touchStartX = null;
-            contentDiv.addEventListener("touchstart", (ev) => {
-                if (ev.touches && ev.touches.length === 1)
-                    touchStartX = ev.touches[0].clientX;
-            });
-            contentDiv.addEventListener("touchmove", (ev) => {
-                if (ev.touches && ev.touches.length === 1) {
-                    const deltaX = ev.touches[0].clientX - touchStartX;
-                    contentDiv.style.transform = `translateX(${deltaX}px)`;
-                    if (deltaX > 0) {
-                        editLabel.style.opacity = "1";
-                        deleteLabel.style.opacity = "0";
-                    } else if (deltaX < 0) {
-                        deleteLabel.style.opacity = "1";
-                        editLabel.style.opacity = "0";
-                    }
-                }
-            });
-            contentDiv.addEventListener("touchend", (ev) => {
-                if (
-                    touchStartX !== null &&
-                    ev.changedTouches &&
-                    ev.changedTouches.length === 1
-                ) {
-                    const deltaX = ev.changedTouches[0].clientX - touchStartX;
-                    const id = en.id;
-                    if (deltaX < -50) {
-                        tx(STORE_ENTRIES, "readwrite").delete(id);
-                        loadEntries(currentDate);
-                    } else if (deltaX > 50) {
-                        tx(STORE_ENTRIES).get(id).onsuccess = (evGet) => {
-                            const entry = evGet.target.result;
-                            if (entry) {
-                                document.getElementById(
-                                    "entryModalLabel"
-                                ).textContent = "Eintrag bearbeiten";
-                                document.getElementById(
-                                    "modal-entry-id"
-                                ).value = entry.id;
-                                document.getElementById("modal-hours").value =
-                                    Math.floor(entry.minutes / 60);
-                                document.getElementById("modal-minutes").value =
-                                    entry.minutes % 60;
-                                document.getElementById(
-                                    "modal-category"
-                                ).value = entry.category;
-                                document.getElementById("modal-note").value =
-                                    entry.note;
-                                bootstrap.Modal.getOrCreateInstance(
-                                    document.getElementById("entryModal")
-                                ).show();
-                            }
-                        };
-                    }
-                }
-                setTimeout(() => {
-                    contentDiv.style.transform = "translateX(0px)";
-                }, 200);
-                editLabel.style.opacity = "0";
-                deleteLabel.style.opacity = "0";
-                touchStartX = null;
-            });
-            li.addEventListener("touchstart", (ev) => {
-                if (ev.touches && ev.touches.length === 1)
-                    touchStartX = ev.touches[0].clientX;
-            });
-            li.addEventListener("touchend", (ev) => {
-                setTimeout(() => {
-                    contentDiv.style.transform = "translateX(0px)";
-                }, 200);
-                editLabel.style.opacity = "0";
-                deleteLabel.style.opacity = "0";
-                touchStartX = null;
-            });
+            // Icons on the right
+            const iconContainer = document.createElement("div");
+            iconContainer.classList.add("d-flex", "gap-2");
+            iconContainer.appendChild(editBtn);
+            iconContainer.appendChild(deleteBtn);
+            li.appendChild(iconContainer);
             entriesList.appendChild(li);
         });
         // After populating

@@ -39,46 +39,14 @@ td {
   padding: 0.5rem;
   text-align: center;
 }
-/* Sliding animation and labels for entries list */
-.list li {
-  position: relative;
-  overflow: hidden;
-}
-.list li .label {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 60px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  font-weight: bold;
-  z-index: 1;
-  font-size: 0.95rem;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.2s ease;
-}
-.list li .edit-label {
-  left: 0;
-  background: #3498db;
-}
-.list li .delete-label {
-  right: 0;
-  background: #e74c3c;
-}
-.list li .content {
-  transition: transform 0.2s ease;
-  padding: 0.5rem;
-  background: transparent;
-  width: 100%;
-  z-index: 2;
-  position: relative;
-}
 
 /* Left-align Bootstrap tooltip text */
 .tooltip-inner {
   text-align: left;
+}
+
+/* Highlight entries on hover */
+#entries-list li:hover {
+  background-color: #f9f9f9;
 }
 /* Day navigation centered */
