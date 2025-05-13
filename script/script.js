@@ -481,14 +481,14 @@ function initDayView() {
     function update() {
         loadEntries(currentDate);
     }
-    document.getElementById("prev-day").addEventListener("click", () => {
+    document.getElementById("prev-day").onclick = () => {
         currentDate.setDate(currentDate.getDate() - 1);
         update();
-    });
-    document.getElementById("next-day").addEventListener("click", () => {
+    };
+    document.getElementById("next-day").onclick = () => {
         currentDate.setDate(currentDate.getDate() + 1);
         update();
-    });
+    };
     update();
 }
 
