@@ -307,31 +307,32 @@ function renderOverview() {
             });
             const catBody = document.getElementById("cat-overview-body");
             catBody.innerHTML = "";
-            const detailGroups = {
-                "A+B": ["A", "B"],
-                "C+D+E": ["C", "D", "E"],
-                EA: ["EA"],
-            };
+            // Gesamt-IST-Minuten für Prozent-Basis
             const totalIstMinutes = entries.reduce(
                 (sum, it) => sum + it.minutes,
                 0
             );
-            Object.entries(detailGroups).forEach(([label, codes]) => {
-                const groupMinutes = entries
-                    .filter((it) => codes.includes(it.category))
-                    .reduce((sum, it) => sum + it.minutes, 0);
-                const hours = groupMinutes / 60;
-                const percent = totalIstMinutes
-                    ? (groupMinutes / totalIstMinutes) * 100
-                    : 0;
-                const row = document.createElement("tr");
-                row.innerHTML = `
-                    <td>${label}</td>
-                    <td>${hours.toFixed(2)}</td>
-                    <td>${percent.toFixed(1)}</td>
-                `;
-                catBody.appendChild(row);
-            });
+
+            // Lade alle Kategorien dynamisch aus IndexedDB
+            tx(STORE_CATEGORIES).getAll().onsuccess = (evCats) => {
+                const categories = evCats.target.result; // Array von { id, code, name }
+                categories.forEach((cat) => {
+                    const minutesPerCat = entries
+                        .filter((it) => it.category === cat.code)
+                        .reduce((sum, it) => sum + it.minutes, 0);
+                    const hours = minutesPerCat / 60;
+                    const percent = totalIstMinutes
+                        ? (minutesPerCat / totalIstMinutes) * 100
+                        : 0;
+                    const row = document.createElement("tr");
+                    row.innerHTML = `
+                        <td class="text-start">${cat.code} ${cat.name}</td>
+                        <td>${hours.toFixed(2)}</td>
+                        <td>${percent.toFixed(1)}</td>
+                        `;
+                    catBody.appendChild(row);
+                });
+            };
         };
     };
 }
