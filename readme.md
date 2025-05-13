@@ -20,7 +20,7 @@ Eine leichte Web-App zur lokalen Zeiterfassung, optimiert für Lehrpersonen. Nut
   - Navigation der Tage per ‹–› Buttons
   - Einträge werden jeweils zugehörig zum ausgewählten Tag angezeigt
   - „Neuer Eintrag“ und Bearbeitung per Bootstrap-Modal
-  - Swipe-Gesten: links wischen = löschen, rechts wischen = bearbeiten
+  - Ändern und löschen einzelner Einträge
   - Tages-Summe (Stunden & Minuten)
 
 - **Übersicht**
