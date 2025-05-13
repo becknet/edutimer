@@ -337,35 +337,6 @@ function renderOverview() {
     };
 }
 
-// csv exportieren
-function exportCSV() {
-    tx(STORE_ENTRIES).getAll().onsuccess = (e) => {
-        const all = e.target.result;
-        if (!all.length) return alert("Keine Einträge.");
-        const hdr = ["id", "date", "minutes", "category", "note"];
-        const rows = all.map((o) =>
-            hdr
-                .map((h) => `"${(o[h] || "").toString().replace(/"/g, '""')}"`)
-                .join(";")
-        );
-        const csv = [hdr.join(";"), ...rows].join("\r\n");
-        const blob = new Blob([csv], { type: "text/csv" });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        const now = new Date();
-        const pad = (n) => n.toString().padStart(2, "0");
-        const ts = `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(
-            now.getDate()
-        )}${pad(now.getHours())}${pad(now.getMinutes())}${pad(
-            now.getSeconds()
-        )}`;
-        a.download = `EduTimer_Export_${ts}.csv`;
-        a.click();
-        URL.revokeObjectURL(url);
-    };
-}
-
 // einträge ohne konfiguration löschen
 function clearDB() {
     if (
@@ -410,8 +381,37 @@ function resetDB() {
     }
 }
 
+// csv exportieren
+function exportCSV() {
+    tx(STORE_ENTRIES).getAll().onsuccess = (e) => {
+        const all = e.target.result;
+        if (!all.length) return alert("Keine Einträge.");
+        const hdr = ["id", "date", "minutes", "category", "note"];
+        const rows = all.map((o) =>
+            hdr
+                .map((h) => `"${(o[h] || "").toString().replace(/"/g, '""')}"`)
+                .join(";")
+        );
+        const csv = [hdr.join(";"), ...rows].join("\r\n");
+        const blob = new Blob([csv], { type: "text/csv" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        const now = new Date();
+        const pad = (n) => n.toString().padStart(2, "0");
+        const ts = `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(
+            now.getDate()
+        )}${pad(now.getHours())}${pad(now.getMinutes())}${pad(
+            now.getSeconds()
+        )}`;
+        a.download = `EduTimer_Export_${ts}.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
+    };
+}
+
 // csv importieren
-function importDB() {
+function importCSV() {
     const file = document.getElementById("import-input").files[0];
     if (!file) return;
     const reader = new FileReader();
@@ -613,11 +613,14 @@ document.addEventListener("DOMContentLoaded", () => {
             .getElementById("export-btn")
             .addEventListener("click", exportCSV);
         document
+            .getElementById("import-input")
+            .addEventListener("change", function(){
+                importCSV();
+                alert('CSV wurde erfogreich importiert.');
+            } );
+        document
             .getElementById("clear-entries-btn")
             .addEventListener("click", clearDB);
-        document
-            .getElementById("import-input")
-            .addEventListener("click", importDB);
         document
             .getElementById("reset-db-btn")
             .addEventListener("click", resetDB);
