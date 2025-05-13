@@ -7,6 +7,7 @@ const STORE_CONFIG = "config";
 const STORE_ENTRIES = "entries";
 const STORE_CATEGORIES = "categories";
 
+// Default Kategories
 const defaultCodes = ["A", "B", "C", "D", "E", "EA"];
 
 // IndexedDB instance
@@ -480,14 +481,14 @@ function initDayView() {
     function update() {
         loadEntries(currentDate);
     }
-    document.getElementById("prev-day").onclick = () => {
+    document.getElementById("prev-day").addEventListener("click", () => {
         currentDate.setDate(currentDate.getDate() - 1);
         update();
-    };
-    document.getElementById("next-day").onclick = () => {
+    });
+    document.getElementById("next-day").addEventListener("click", () => {
         currentDate.setDate(currentDate.getDate() + 1);
         update();
-    };
+    });
     update();
 }
 
@@ -607,7 +608,7 @@ document.addEventListener("DOMContentLoaded", () => {
             .addEventListener("click", exportCSV);
         document
             .getElementById("import-input")
-            .addEventListener("change", function () {
+            .addEventListener("change", () => {
                 importCSV();
                 alert("CSV wurde erfogreich importiert.");
             });
