@@ -462,13 +462,20 @@ function importCSV() {
 function initConfig() {
     document.getElementById("config-form").addEventListener("submit", (e) => {
         e.preventDefault();
+        // startdatum kleiner enddatum
+        const startValue = document.getElementById("year-start").value;
+        const endValue = document.getElementById("year-end").value;
+        if (startValue >= endValue) {
+            alert("Das Startdatum muss vor dem Enddatum liegen.");
+            return;
+        }
         const cfg = {
             id: 1,
             yearHours: +document.getElementById("year-hours").value,
             employment: +document.getElementById("employment-rate").value,
             age: +document.getElementById("age").value,
-            start: document.getElementById("year-start").value,
-            end: document.getElementById("year-end").value,
+            start: startValue,
+            end: endValue,
         };
         tx(STORE_CONFIG, "readwrite").put(cfg);
         alert("Konfiguration gespeichert");
@@ -586,23 +593,7 @@ document.addEventListener("DOMContentLoaded", () => {
         initConfig();
         initModal();
         initNavigation();
-        // Set initial min/max attributes for year-start and year-end
-        const startInput = document.getElementById("year-start");
-        const endInput = document.getElementById("year-end");
-        if (startInput.value) endInput.min = startInput.value;
-        if (endInput.value) startInput.max = endInput.value;
-        startInput.addEventListener("change", () => {
-            endInput.min = startInput.value;
-            if (endInput.value && endInput.value < startInput.value) {
-                endInput.value = startInput.value;
-            }
-        });
-        endInput.addEventListener("change", () => {
-            startInput.max = endInput.value;
-            if (startInput.value && startInput.value > endInput.value) {
-                startInput.value = endInput.value;
-            }
-        });
+        
         document
             .getElementById("export-btn")
             .addEventListener("click", exportCSV);
