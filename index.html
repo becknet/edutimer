@@ -42,12 +42,15 @@
         <section id="config">
             <h2>Konfiguration</h2>
             <form id="config-form" class="mb-3">
-                <label class="form-label">Jahresarbeitszeit (Stunden):
-                  <i class="bi bi-question-circle ms-2 text-muted"
-                                     data-bs-toggle="tooltip"
-                                     data-bs-placement="top"
-                                     data-bs-html="true"
-                                     title="Die Jahresarbeitszeit kann auf der Webseite des Kanton BL eingesehen werden."></i>
+                <label class="form-label"
+                    >Jahresarbeitszeit (Stunden):
+                    <i
+                        class="bi bi-question-circle ms-2 text-muted"
+                        data-bs-toggle="tooltip"
+                        data-bs-placement="top"
+                        data-bs-html="true"
+                        title="Die Jahresarbeitszeit kann auf der Webseite des Kanton BL eingesehen werden."
+                    ></i>
                 </label>
                 <input
                     class="form-control"
@@ -58,13 +61,16 @@
                     step="1"
                     required
                 />
-                <label class="form-label">Anstellungsgrad (%):
-                  <i class="bi bi-question-circle ms-2 text-muted"
-                                     data-bs-toggle="tooltip"
-                                     data-bs-placement="top"
-                                     data-bs-html="true"
-                                     title="Anstellungsgrad in % laut deinem Vertrag.<br>
-                                     Beeinflusst die Jahresarbeitszeit."></i>
+                <label class="form-label"
+                    >Anstellungsgrad (%):
+                    <i
+                        class="bi bi-question-circle ms-2 text-muted"
+                        data-bs-toggle="tooltip"
+                        data-bs-placement="top"
+                        data-bs-html="true"
+                        title="Anstellungsgrad in % laut deinem Vertrag.<br>
+                                     Beeinflusst die Jahresarbeitszeit."
+                    ></i>
                 </label>
                 <input
                     class="form-control"
@@ -77,15 +83,18 @@
                     inputmode="decimal"
                     pattern="\d+(\.\d{1,2})?"
                 />
-                <label class="form-label">Alter (Jahre):
-                  <i class="bi bi-question-circle ms-2 text-muted"
-                                     data-bs-toggle="tooltip"
-                                     data-bs-placement="top"
-                                     data-bs-html="true"
-                                     title="Beeinflusst die Ferientage:<br>
+                <label class="form-label"
+                    >Alter (Jahre):
+                    <i
+                        class="bi bi-question-circle ms-2 text-muted"
+                        data-bs-toggle="tooltip"
+                        data-bs-placement="top"
+                        data-bs-html="true"
+                        title="Beeinflusst die Ferientage:<br>
                                      < 50: 25 Tage<br>
                                      > 50 < 60: 27 Tage<br>
-                                     > 60: 30 Tage"></i>
+                                     > 60: 30 Tage"
+                    ></i>
                 </label>
                 <input
                     class="form-control"
@@ -97,13 +106,16 @@
                     required
                     inputmode="numeric"
                 />
-                <label class="form-label">Start-Datum:
-                  <i class="bi bi-question-circle ms-2 text-muted"
-                                     data-bs-toggle="tooltip"
-                                     data-bs-placement="top"
-                                     data-bs-html="true"
-                                     title="1. Januar des aktuellen Jahres<br>
-                                     oder das Datum deines Eintritts in den Schuldienst."></i>
+                <label class="form-label"
+                    >Start-Datum:
+                    <i
+                        class="bi bi-question-circle ms-2 text-muted"
+                        data-bs-toggle="tooltip"
+                        data-bs-placement="top"
+                        data-bs-html="true"
+                        title="1. Januar des aktuellen Jahres<br>
+                                     oder das Datum deines Eintritts in den Schuldienst."
+                    ></i>
                 </label>
                 <input
                     class="form-control"
@@ -111,13 +123,16 @@
                     id="year-start"
                     required
                 />
-                <label class="form-label">End-Datum:
-                  <i class="bi bi-question-circle ms-2 text-muted"
-                                     data-bs-toggle="tooltip"
-                                     data-bs-placement="top"
-                                     data-bs-html="true"
-                                     title="31. Dezember des aktuellen Jahres<br>
-                                     oder das Datum deines Austretens aus dem Schuldienst."></i>
+                <label class="form-label"
+                    >End-Datum:
+                    <i
+                        class="bi bi-question-circle ms-2 text-muted"
+                        data-bs-toggle="tooltip"
+                        data-bs-placement="top"
+                        data-bs-html="true"
+                        title="31. Dezember des aktuellen Jahres<br>
+                                     oder das Datum deines Austretens aus dem Schuldienst."
+                    ></i>
                 </label>
                 <input
                     class="form-control"
@@ -129,12 +144,15 @@
             </form>
 
             <!-- Kategorien-->
-            <h3>Kategorien verwalten
-              <i class="bi bi-question-circle ms-2 text-muted"
-                                     data-bs-toggle="tooltip"
-                                     data-bs-placement="top"
-                                     data-bs-html="true"
-                                     title="Weitere Individuelle Kategegorien hinzufügen und löschen."></i>
+            <h3>
+                Kategorien verwalten
+                <i
+                    class="bi bi-question-circle ms-2 text-muted"
+                    data-bs-toggle="tooltip"
+                    data-bs-placement="top"
+                    data-bs-html="true"
+                    title="Weitere Individuelle Kategegorien hinzufügen und löschen."
+                ></i>
             </h3>
             <form id="cat-form" class="mb-3">
                 <label class="form-label">Code:</label>
@@ -159,22 +177,28 @@
             <ul class="list" id="cat-list"></ul>
 
             <!-- Import / Export-->
-            <h3>Export
-              <i class="bi bi-question-circle ms-2 text-muted"
-                                     data-bs-toggle="tooltip"
-                                     data-bs-placement="top"
-                                     data-bs-html="true"
-                                     title="Alle Daten im Format CSV als Backup exportieren"></i>
+            <h3>
+                Export
+                <i
+                    class="bi bi-question-circle ms-2 text-muted"
+                    data-bs-toggle="tooltip"
+                    data-bs-placement="top"
+                    data-bs-html="true"
+                    title="Alle Daten im Format CSV als Backup exportieren"
+                ></i>
             </h3>
             <button id="export-btn" class="btn btn-success mb-3">
                 Export als CSV
             </button>
-            <h3>Import
-              <i class="bi bi-question-circle ms-2 text-muted"
-                                     data-bs-toggle="tooltip"
-                                     data-bs-placement="top"
-                                     data-bs-html="true"
-                                     title="Exportiertes CSV importieren"></i>
+            <h3>
+                Import
+                <i
+                    class="bi bi-question-circle ms-2 text-muted"
+                    data-bs-toggle="tooltip"
+                    data-bs-placement="top"
+                    data-bs-html="true"
+                    title="Exportiertes CSV importieren"
+                ></i>
             </h3>
             <input
                 type="file"
@@ -183,15 +207,18 @@
                 class="form-control mb-3"
             />
             <!--Löschen-->
-            <h3>Löschen
-              <i class="bi bi-question-circle ms-2 text-muted"
-                                     data-bs-toggle="tooltip"
-                                     data-bs-placement="top"
-                                     data-bs-html="true"
-                                     title="Einträge Löschen:<br>
+            <h3>
+                Löschen
+                <i
+                    class="bi bi-question-circle ms-2 text-muted"
+                    data-bs-toggle="tooltip"
+                    data-bs-placement="top"
+                    data-bs-html="true"
+                    title="Einträge Löschen:<br>
                                      Konfiguration bleibt erhalten<br>
                                      Datenbank zurücksetzten:<br>
-                                     Alle informationen werden gelöscht"></i>
+                                     Alle informationen werden gelöscht"
+                ></i>
             </h3>
             <button id="clear-entries-btn" class="btn btn-warning mb-3">
                 Alle Einträge löschen
@@ -220,21 +247,42 @@
                     Neuer Eintrag
                 </button>
             </div>
-            <ul class="list" id="entries-list"></ul>
-            <div class="text-end mt-2">
-                <strong>Summe: <span class="total">0h 0min</span></strong>
-            </div>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Zeit</th>
+                        <th>Kategorie</th>
+                        <th>Bemerkung</th>
+                        <th>Aktionen</th>
+                    </tr>
+                </thead>
+                <tbody id="entries-list">
+                    <!-- Rows injected by script -->
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td class="total-cell"></td>
+                        <td colspan="4" class="text-start">
+                            <strong>Total</strong>
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
         </section>
-        
+
         <!-- STATISTIK -->
         <section id="overview">
             <div id="overview-period" class="mb-3 fst-italic"></div>
-            <h2>Übersicht
-              <i class="bi bi-question-circle ms-2 text-muted"
-                                     data-bs-toggle="tooltip"
-                                     data-bs-placement="top"
-                                     data-bs-html="true"
-                                     title="Hier werden deine Stunden in den Kategorien A+B und C+D+E berücksichtig. Du kannst damit überprüfen, ob die im Berufsauftrag festgelegten % Anteile eingehalten werden."></i></h2>
+            <h2>
+                Übersicht
+                <i
+                    class="bi bi-question-circle ms-2 text-muted"
+                    data-bs-toggle="tooltip"
+                    data-bs-placement="top"
+                    data-bs-html="true"
+                    title="Hier werden deine Stunden in den Kategorien A+B und C+D+E berücksichtig. Du kannst damit überprüfen, ob die im Berufsauftrag festgelegten % Anteile eingehalten werden."
+                ></i>
+            </h2>
             <table class="table table-striped mb-3">
                 <thead>
                     <tr>
@@ -247,12 +295,15 @@
                 </thead>
                 <tbody id="overview-body"></tbody>
             </table>
-            <h3>IST nach Kategorie
-              <i class="bi bi-question-circle ms-2 text-muted"
-                                     data-bs-toggle="tooltip"
-                                     data-bs-placement="top"
-                                     data-bs-html="true"
-                                     title="Hier werden alle Kategorien, EA und eigene angezeigt."></i></h2>
+            <h3>
+                IST nach Kategorie
+                <i
+                    class="bi bi-question-circle ms-2 text-muted"
+                    data-bs-toggle="tooltip"
+                    data-bs-placement="top"
+                    data-bs-html="true"
+                    title="Hier werden alle Kategorien, EA und eigene angezeigt."
+                ></i>
             </h3>
             <table class="table table-striped mb-3">
                 <thead>
@@ -291,17 +342,21 @@
                         <form id="modal-entry-form">
                             <input type="hidden" id="modal-entry-id" />
                             <div class="mb-3">
-                                <label class="form-label d-flex align-items-center">
-                                  Kategorie:
-                                  <i class="bi bi-question-circle ms-2 text-muted"
-                                     data-bs-toggle="tooltip"
-                                     data-bs-placement="top"
-                                     data-bs-html="true"
-                                     title="A: Unterricht vor Ort oder Online, Lager, Exkursionen<br>
+                                <label
+                                    class="form-label d-flex align-items-center"
+                                >
+                                    Kategorie:
+                                    <i
+                                        class="bi bi-question-circle ms-2 text-muted"
+                                        data-bs-toggle="tooltip"
+                                        data-bs-placement="top"
+                                        data-bs-html="true"
+                                        title="A: Unterricht vor Ort oder Online, Lager, Exkursionen<br>
 B: kurz und langfristige Unterrichtsvor- und Nachbereitung, Korrekturen<br>
 C: Konvente, SCHIWE, Team-, Fachbereichssitzungen, MAG<br>
 D: Beratung von SuS ausserhalb des Unterrichts, Kommunikation mit Lehrbetrieben<br>
-E: Individuelle Weiterbildung, pädagogisch, fachlich, didaktisch."></i>
+E: Individuelle Weiterbildung, pädagogisch, fachlich, didaktisch."
+                                    ></i>
                                 </label>
                                 <select
                                     id="modal-category"
@@ -310,12 +365,14 @@ E: Individuelle Weiterbildung, pädagogisch, fachlich, didaktisch."></i>
                                 ></select>
                             </div>
                             <div class="mb-3">
-                                <label class="form-label">Stunden:
-                                  <i class="bi bi-question-circle ms-2 text-muted"
-                                     data-bs-toggle="tooltip"
-                                     data-bs-placement="top"
-                                     title="Anzahl Stunden"></i>
-                                </label>
+                                <label class="form-label"
+                                    >Stunden:
+                                    <i
+                                        class="bi bi-question-circle ms-2 text-muted"
+                                        data-bs-toggle="tooltip"
+                                        data-bs-placement="top"
+                                        title="Anzahl Stunden"
+                                    ></i>
                                 </label>
                                 <input
                                     type="number"
@@ -329,12 +386,14 @@ E: Individuelle Weiterbildung, pädagogisch, fachlich, didaktisch."></i>
                                 />
                             </div>
                             <div class="mb-3">
-                                <label class="form-label">Minuten:
-                                  <i class="bi bi-question-circle ms-2 text-muted"
-                                     data-bs-toggle="tooltip"
-                                     data-bs-placement="top"
-                                     title="Anzahl Minuten: 1-60"></i>
-                                </label>
+                                <label class="form-label"
+                                    >Minuten:
+                                    <i
+                                        class="bi bi-question-circle ms-2 text-muted"
+                                        data-bs-toggle="tooltip"
+                                        data-bs-placement="top"
+                                        title="Anzahl Minuten: 1-60"
+                                    ></i>
                                 </label>
                                 <input
                                     type="number"
@@ -349,12 +408,14 @@ E: Individuelle Weiterbildung, pädagogisch, fachlich, didaktisch."></i>
                                 />
                             </div>
                             <div class="mb-3">
-                                <label class="form-label">Bemerkung:
-                                  <i class="bi bi-question-circle ms-2 text-muted"
-                                     data-bs-toggle="tooltip"
-                                     data-bs-placement="top"
-                                     title="Die Beschreibung hilft, deine Arbeit genauer zu deklarieren."></i>
-                                </label>
+                                <label class="form-label"
+                                    >Bemerkung:
+                                    <i
+                                        class="bi bi-question-circle ms-2 text-muted"
+                                        data-bs-toggle="tooltip"
+                                        data-bs-placement="top"
+                                        title="Die Beschreibung hilft, deine Arbeit genauer zu deklarieren."
+                                    ></i>
                                 </label>
                                 <input
                                     type="text"

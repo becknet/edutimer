@@ -208,29 +208,41 @@ function loadEntries(currentDate) {
     fetchPromise.then((results) => {
         results.forEach((en) => {
             totalMinutes += en.minutes;
-            const li = document.createElement("li");
-            // Make each <li> a flex container, right-align icons
-            li.classList.add(
-                "d-flex",
-                "justify-content-between",
-                "align-items-center"
-            );
-            const contentDiv = document.createElement("div");
-            contentDiv.className = "content";
-            contentDiv.textContent = `${(en.minutes / 60).toFixed(2)}h | ${
-                en.category
-            } | ${en.note}`;
+            // Create a table row for each entry
+            const tr = document.createElement("tr");
+            
+            const tdTime = document.createElement("td");
+            tdTime.textContent = `${(en.minutes / 60).toFixed(2)}h`;
+            tdTime.classList.add("text-start");
+            tr.appendChild(tdTime);
 
-            // Create edit and delete icon buttons
+            const tdCat = document.createElement("td");
+            tdCat.textContent = en.category;
+            tdCat.classList.add("text-start");
+            tr.appendChild(tdCat);
+
+            const tdNote = document.createElement("td");
+            tdNote.textContent = en.note;
+            tdNote.classList.add("text-start");
+            tr.appendChild(tdNote);
+
+            const tdEdit = document.createElement("td");
+            tdEdit.classList.add("text-end");
+            // Edit icon
             const editBtn = document.createElement("i");
-            editBtn.className =
-                "bi bi-pencil-square edit-btn text-primary ms-2";
+            editBtn.className = "bi bi-pencil-square text-primary me-3";
+            editBtn.style.cursor = "pointer";
             editBtn.title = "Bearbeiten";
+
+            const tdDelete = document.createElement("td");
+            tdDelete.classList.add("text-end");
+            // Delete icon
             const deleteBtn = document.createElement("i");
-            deleteBtn.className = "bi bi-trash delete-btn text-danger ms-2";
+            deleteBtn.className = "bi bi-trash text-danger";
+            deleteBtn.style.cursor = "pointer";
             deleteBtn.title = "Löschen";
 
-            // Click handlers
+            // Attach handlers
             editBtn.addEventListener("click", () => {
                 // Populate modal for editing
                 document.getElementById("entryModalLabel").textContent =
@@ -247,7 +259,6 @@ function loadEntries(currentDate) {
                     document.getElementById("entryModal")
                 ).show();
             });
-
             deleteBtn.addEventListener("click", () => {
                 if (confirm("Eintrag löschen?")) {
                     tx(STORE_ENTRIES, "readwrite").delete(en.id);
@@ -255,20 +266,17 @@ function loadEntries(currentDate) {
                 }
             });
 
-            // Content on the left
-            li.appendChild(contentDiv);
-            // Icons on the right
-            const iconContainer = document.createElement("div");
-            iconContainer.classList.add("d-flex", "gap-2");
-            iconContainer.appendChild(editBtn);
-            iconContainer.appendChild(deleteBtn);
-            li.appendChild(iconContainer);
-            entriesList.appendChild(li);
+            tdEdit.appendChild(editBtn);
+            tdDelete.appendChild(deleteBtn);
+            tr.appendChild(tdEdit);
+            tr.appendChild(tdDelete);
+
+            entriesList.appendChild(tr);
         });
-        // After populating
-        document.querySelector("#day .total").textContent = `${Math.floor(
-            totalMinutes / 60
-        )}h ${totalMinutes % 60}min`;
+        const total = (totalMinutes / 60).toFixed(2);
+        document.querySelector(
+            ".total-cell"
+        ).textContent = `${total}h`;
     });
 }
 
@@ -601,7 +609,7 @@ document.addEventListener("DOMContentLoaded", () => {
         initConfig();
         initModal();
         initNavigation();
-        
+
         document
             .getElementById("export-btn")
             .addEventListener("click", exportCSV);
