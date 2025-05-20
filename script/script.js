@@ -337,11 +337,19 @@ function renderOverview() {
                         ? (minutesPerCat / totalIstMinutes) * 100
                         : 0;
                     const row = document.createElement("tr");
-                    row.innerHTML = `
-                        <td class="text-start">${cat.code} ${cat.name}</td>
-                        <td>${hours.toFixed(2)}</td>
-                        <td>${percent.toFixed(1)}</td>
-                        `;
+                    // Category cell
+                    const tdCode = document.createElement("td");
+                    tdCode.className = "text-start";
+                    tdCode.textContent = `${cat.code} - ${cat.name}`;
+                    row.appendChild(tdCode);
+                    // Hours cell
+                    const tdHours = document.createElement("td");
+                    tdHours.textContent = hours.toFixed(2);
+                    row.appendChild(tdHours);
+                    // Percent cell
+                    const tdPercent = document.createElement("td");
+                    tdPercent.textContent = percent.toFixed(1);
+                    row.appendChild(tdPercent);
                     catBody.appendChild(row);
                 });
             };
