@@ -1,6 +1,7 @@
 # EduTimer – Zeiterfassung für Lehrpersonen
 
-Eine leichte Web-App zur lokalen Zeiterfassung, optimiert für Lehrpersonen. Nutzt IndexedDB im Browser, lässt sich als PWA auf iOS/Android installieren und funktioniert komplett offline.
+Eine Web-App zur lokalen Zeiterfassung, optimiert für Lehrpersonen Berufsbildung Kanton BL. 
+Nutzt IndexedDB im Browser, lässt sich als PWA auf iOS/Android installieren und funktioniert komplett offline.
 
 ---
 
@@ -19,21 +20,16 @@ Eine leichte Web-App zur lokalen Zeiterfassung, optimiert für Lehrpersonen. Nut
 - **Tagesansicht**
   - Navigation der Tage per ‹–› Buttons
   - Einträge werden jeweils zugehörig zum ausgewählten Tag angezeigt
-  - „Neuer Eintrag“ und Bearbeitung per Bootstrap-Modal
+  - Eintrag bearbeiten und löschen
   - Ändern und löschen einzelner Einträge
   - Tages-Summe (Stunden & Minuten)
 
 - **Übersicht**
-  - SOLL/Stunden- und Prozentwerte (A+B, C+D+E)
+  - SOLL/IST Stunden- und Prozentwerte (A+B, C+D+E)
   - IST/Stunden- und Prozentwerte (A,B,C,D,E,EA,eigene Kategorien)
   - CSV-Export & CSV-Import
-  - Button zum Löschen aller Einträge (Konfiguration & Kategorien bleiben erhalten)
+  - Löschen aller Einträge (Konfiguration & Kategorien bleiben erhalten)
   - Löschen der ganzen DB
-
-- **PWA-Support**
-  - `favicon.png` als App-Icon
-  - `<link rel="apple-touch-icon">` für iOS-Home-Screen
-  - `apple-mobile-web-app-capable` für Vollbildmodus
 
 ---
 
@@ -42,7 +38,7 @@ https://becknet.github.io/edutimer/
 
 ---
 
-## Als App speichern ##
+## oder als WebApp speichern ##
    - In Safari (iOS): Teilen → Zum Home-Bildschirm.  
    - In Chrome (Android): Menü → Zum Startbildschirm.
 
@@ -72,9 +68,8 @@ https://becknet.github.io/edutimer/
 ## Tech-Stack
 
 - **IndexedDB** für lokale Datenspeicherung  
-- **Vanilla JavaScript** (kein Framework)  
+- **Vanilla JavaScript** ohne Framework 
 - **Bootstrap 5** + **Bootstrap Icons**  
-- **PWA-fähig** via Apple-Meta-Tags
 
 ---
 
