@@ -164,11 +164,11 @@ function loadConfig() {
 
 // einträge des aktuellen Tages laden
 function loadEntries(currentDate) {
-    const dateEl = document.getElementById("current-date");
+    const dateInput = document.getElementById("current-date");
     const entriesList = document.getElementById("entries-list");
 
     // Display the provided date
-    dateEl.textContent = currentDate.toLocaleDateString("de-DE");
+    dateInput.value = formatDateISO(currentDate);
 
     // Use date index to fetch only entries for currentDate, fallback to scan if index missing
     const isoDate = formatDateISO(currentDate);
@@ -210,7 +210,7 @@ function loadEntries(currentDate) {
             totalMinutes += en.minutes;
             // Create a table row for each entry
             const tr = document.createElement("tr");
-            
+
             const tdTime = document.createElement("td");
             tdTime.textContent = `${(en.minutes / 60).toFixed(2)}h`;
             tdTime.classList.add("text-start");
@@ -274,9 +274,7 @@ function loadEntries(currentDate) {
             entriesList.appendChild(tr);
         });
         const total = (totalMinutes / 60).toFixed(2);
-        document.querySelector(
-            ".total-cell"
-        ).textContent = `${total}h`;
+        document.querySelector(".total-cell").textContent = `${total}h`;
     });
 }
 
@@ -499,22 +497,6 @@ function initConfig() {
     loadConfig();
 }
 
-function initDayView() {
-    // reuse global currentDate
-    function update() {
-        loadEntries(currentDate);
-    }
-    document.getElementById("prev-day").onclick = () => {
-        currentDate.setDate(currentDate.getDate() - 1);
-        update();
-    };
-    document.getElementById("next-day").onclick = () => {
-        currentDate.setDate(currentDate.getDate() + 1);
-        update();
-    };
-    update();
-}
-
 function initModal() {
     document.getElementById("new-entry-btn").addEventListener("click", () => {
         document.getElementById("entryModalLabel").textContent =
@@ -610,22 +592,58 @@ document.addEventListener("DOMContentLoaded", () => {
         initModal();
         initNavigation();
 
+        // Export CSV
         document
             .getElementById("export-btn")
             .addEventListener("click", exportCSV);
+
+        // Import CSV
         document
             .getElementById("import-input")
             .addEventListener("change", () => {
                 importCSV();
                 alert("CSV wurde erfogreich importiert.");
             });
+        
+        // Clear DB
         document
             .getElementById("clear-entries-btn")
             .addEventListener("click", clearDB);
+        
+        // Reset DB
         document
             .getElementById("reset-db-btn")
             .addEventListener("click", resetDB);
+        
+        // Datepicker 
+        document
+            .getElementById("current-date")
+            .addEventListener("change", () => {
+                // Wenn der Nutzer ein Datum pickt, update currentDate und lade die Einträge neu
+                if (document.getElementById("current-date").value) {
+                    currentDate = new Date(
+                        document.getElementById("current-date").value
+                    );
+                    loadEntries(currentDate);
+                }
+            });
+
+        // Next Day
+        document.getElementById("prev-day").onclick = () => {
+            currentDate.setDate(currentDate.getDate() - 1);
+            loadEntries(currentDate);
+        };
+
+        // Previous Day
+        document.getElementById("next-day").onclick = () => {
+            currentDate.setDate(currentDate.getDate() + 1);
+            loadEntries(currentDate);
+        };
+
+        loadEntries(currentDate);
+
     })();
+
     var tooltipTriggerList = [].slice.call(
         document.querySelectorAll('[data-bs-toggle="tooltip"]')
     );

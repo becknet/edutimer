@@ -231,10 +231,10 @@
         <!-- NEUE EINTRAEGE -->
         <section id="day">
             <div
-                class="day-nav d-flex justify-content-center align-items-center gap-4"
+                class="day-nav d-flex justify-content-center align-items-center gap-2"
             >
                 <button id="prev-day" class="btn btn-outline-primary">←</button>
-                <h2 id="current-date" class="pt-3"></h2>
+                <input type="date" id="current-date" class="form-control text-center w-25" />
                 <button id="next-day" class="btn btn-outline-primary">→</button>
             </div>
             <div class="text-center mb-3 mt-3">
@@ -253,7 +253,7 @@
                         <th>Zeit</th>
                         <th>Kategorie</th>
                         <th>Bemerkung</th>
-                        <th>Aktionen</th>
+                        <th colspan="2">Aktionen</th>
                     </tr>
                 </thead>
                 <tbody id="entries-list">
