@@ -538,7 +538,7 @@ function initNavigation() {
                 .querySelectorAll("section")
                 .forEach((s) => s.classList.remove("active"));
             document.getElementById(b.dataset.target).classList.add("active");
-            if (b.dataset.target === "day") initDayView();
+            if (b.dataset.target === "day") loadEntries(currentDate);
             if (b.dataset.target === "overview") renderOverview();
         };
     });
@@ -640,7 +640,7 @@ document.addEventListener("DOMContentLoaded", () => {
             loadEntries(currentDate);
         };
 
-        loadEntries(currentDate);
+        //loadEntries(currentDate);
 
     })();
 
