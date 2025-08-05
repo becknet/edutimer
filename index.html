@@ -24,9 +24,11 @@
 
         <link rel="stylesheet" href="css/style.css" />
     </head>
-    <body>
+    <body class="bg-light">
+        <div class="container-sm bg-white shadow-sm min-vh-100 p-0">
         <!-- NAVIGATION -->
-        <header><h2>Zeiterfassung Lehrpersonen</h2></header>
+        <header><h2 class="mb-0">Zeiterfassung Lehrpersonen</h2></header>
+        <div class="p-3">
         <nav class="d-flex justify-content-center gap-3 mt-3 mb-4">
             <button class="btn btn-outline-primary" data-target="day">
                 Tagesansicht
@@ -262,7 +264,7 @@
                         <th>Zeit</th>
                         <th>Kategorie</th>
                         <th>Bemerkung</th>
-                        <th colspan="2">Aktionen</th>
+                        <th colspan="2" class="text-end">Aktionen</th>
                     </tr>
                 </thead>
                 <tbody id="entries-list">
@@ -452,6 +454,8 @@ E: Individuelle Weiterbildung, pädagogisch, fachlich, didaktisch."
                     </div>
                 </div>
             </div>
+        </div>
+        </div>
         </div>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
         <script src="script/script.js" defer></script>
