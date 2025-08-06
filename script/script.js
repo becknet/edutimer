@@ -288,9 +288,17 @@ function renderOverview() {
         // Show the configured period in dd.mm.yyyy
         const startLocal = new Date(c.start).toLocaleDateString("de-DE");
         const endLocal = new Date(c.end).toLocaleDateString("de-DE");
+        
+        // Calculate vacation days and hours for the period
+        const vacDaysPerYear = c.age < 50 ? 25 : c.age < 60 ? 27 : 30;
+        const start = new Date(c.start), end = new Date(c.end);
+        const days = Math.floor((end - start) / (1000 * 60 * 60 * 24)) + 1;
+        const vacDaysForPeriod = vacDaysPerYear * (days / 365);
+        const vacHours = vacDaysForPeriod * 8.4 * (c.employment / 100);
+        
         document.getElementById(
             "overview-period"
-        ).textContent = `Zeitraum: ${startLocal} bis ${endLocal}`;
+        ).innerHTML = `Zeitraum: ${startLocal} bis ${endLocal}<br>Ferientage: ${vacDaysForPeriod.toFixed(1)} Tage (${vacHours.toFixed(1)}h)`;
         const total = calculateRequiredHours(
             c.yearHours,
             c.employment,
@@ -565,9 +573,10 @@ function calculateRequiredHours(
         end = new Date(endISO);
     const days = Math.floor((end - start) / (1000 * 60 * 60 * 24)) + 1;
     let total = yearHours * (employmentPercent / 100) * (days / 365);
-    // Urlaubstage basierend auf Alter abziehen (8.4h pro Tag), skaliert mit Anstellungsgrad
-    const vacDays = age < 50 ? 25 : age < 60 ? 27 : 30;
-    const vacHours = vacDays * 8.4 * (employmentPercent / 100);
+    // Urlaubstage basierend auf Alter abziehen (8.4h pro Tag), skaliert mit Anstellungsgrad und Zeitraum
+    const vacDaysPerYear = age < 50 ? 25 : age < 60 ? 27 : 30;
+    const vacDaysForPeriod = vacDaysPerYear * (days / 365);
+    const vacHours = vacDaysForPeriod * 8.4 * (employmentPercent / 100);
     total -= vacHours;
     return total;
 }
