@@ -274,8 +274,77 @@ function loadEntries(currentDate) {
             entriesList.appendChild(tr);
         });
         const total = (totalMinutes / 60).toFixed(2);
-        document.querySelector(".total-cell").textContent = `${total}h`;
+        document.querySelector(".total-day").textContent = `${total}h`;
+        updatePeriodTotals(currentDate);
     });
+}
+
+// Sum entries for week and month of the current date
+function updatePeriodTotals(dateObj) {
+    const week = getWeekRange(dateObj);
+    const month = getMonthRange(dateObj);
+    Promise.all([
+        getEntriesByDateRange(week.start, week.end),
+        getEntriesByDateRange(month.start, month.end),
+    ]).then(([weekEntries, monthEntries]) => {
+        const weekTotal = minutesToHours(sumMinutes(weekEntries));
+        const monthTotal = minutesToHours(sumMinutes(monthEntries));
+        document.querySelector(".total-week").textContent = `${weekTotal}h`;
+        document.querySelector(".total-month").textContent = `${monthTotal}h`;
+    });
+}
+
+// Helpers to compute date ranges
+function getWeekRange(dateObj) {
+    const d = new Date(dateObj);
+    const day = d.getDay() || 7; // Monday=1 ... Sunday=7
+    const start = new Date(d);
+    start.setDate(d.getDate() - (day - 1));
+    const end = new Date(start);
+    end.setDate(start.getDate() + 6);
+    return { start: formatDateISO(start), end: formatDateISO(end) };
+}
+
+function getMonthRange(dateObj) {
+    const d = new Date(dateObj);
+    const start = new Date(d.getFullYear(), d.getMonth(), 1);
+    const end = new Date(d.getFullYear(), d.getMonth() + 1, 0);
+    return { start: formatDateISO(start), end: formatDateISO(end) };
+}
+
+// Fetch entries between two ISO dates inclusive
+function getEntriesByDateRange(startISO, endISO) {
+    return new Promise((res) => {
+        const store = db
+            .transaction(STORE_ENTRIES, "readonly")
+            .objectStore(STORE_ENTRIES);
+        if (store.indexNames.contains("by_date")) {
+            const idx = store.index("by_date");
+            const range = IDBKeyRange.bound(startISO, endISO);
+            idx.getAll(range).onsuccess = (e) =>
+                res(e.target.result || []);
+        } else {
+            const results = [];
+            store.openCursor().onsuccess = (e) => {
+                const cur = e.target.result;
+                if (cur) {
+                    if (cur.value.date >= startISO && cur.value.date <= endISO)
+                        results.push(cur.value);
+                    cur.continue();
+                } else {
+                    res(results);
+                }
+            };
+        }
+    });
+}
+
+function sumMinutes(entries) {
+    return entries.reduce((sum, it) => sum + it.minutes, 0);
+}
+
+function minutesToHours(mins) {
+    return (mins / 60).toFixed(2);
 }
 
 // statistik rechnen und anzeigen
@@ -511,6 +580,7 @@ function initModal() {
             "Neuer Eintrag";
         document.getElementById("modal-entry-form").reset();
         document.getElementById("modal-entry-id").value = "";
+        document.getElementById("modal-time-error").textContent = "";
     });
     document.getElementById("save-entry-btn").addEventListener("click", () => {
         const modalForm = document.getElementById("modal-entry-form");
@@ -518,11 +588,16 @@ function initModal() {
             modalForm.reportValidity();
             return;
         }
+        document.getElementById("modal-time-error").textContent = "";
         const id = document.getElementById("modal-entry-id").value;
         const mins =
             Number(document.getElementById("modal-hours").value) * 60 +
             Number(document.getElementById("modal-minutes").value);
-        if (mins <= 0) return alert("Bitte Zeit angeben");
+        if (mins <= 0) {
+            document.getElementById("modal-time-error").textContent =
+                "Bitte Stunden oder Minuten angeben.";
+            return;
+        }
         const entry = {
             date: formatDateISO(currentDate),
             minutes: mins,

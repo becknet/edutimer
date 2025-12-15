@@ -275,9 +275,21 @@
                 </tbody>
                 <tfoot>
                     <tr>
-                        <td class="total-cell"></td>
+                        <td class="total-cell total-day"></td>
                         <td colspan="4" class="text-start">
-                            <strong>Total</strong>
+                            <strong>Total Tag</strong>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="total-week"></td>
+                        <td colspan="4" class="text-start">
+                            <strong>Total Woche</strong>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="total-month"></td>
+                        <td colspan="4" class="text-start">
+                            <strong>Total Monat</strong>
                         </td>
                     </tr>
                 </tfoot>
@@ -367,8 +379,7 @@
             
             <div class="alert alert-info mt-4">
                 <i class="bi bi-info-circle"></i>
-                <strong>Tipp:</strong> Nach der Installation kannst du EduTimer offline verwenden. 
-                Alle Daten werden lokal auf deinem Gerät gespeichert.
+                <strong>Tipp:</strong> EduTimer speichert alle Daten nur lokal auf diesem Gerät und synchronisiert nicht mit anderen Geräten. Nach der Installation auf dem Homescreen kannst du die App offline verwenden.
             </div>
             
             <div class="alert alert-warning mt-3">
@@ -469,7 +480,7 @@ E: Individuelle Weiterbildung, pädagogisch, fachlich, didaktisch."
                                     pattern="\d*"
                                     class="form-control"
                                     id="modal-hours"
-                                    value="0"
+                                    placeholder=" Anzahl Stunden"
                                 />
                             </div>
                             <div class="mb-3">
@@ -491,8 +502,9 @@ E: Individuelle Weiterbildung, pädagogisch, fachlich, didaktisch."
                                     pattern="\d*"
                                     class="form-control"
                                     id="modal-minutes"
-                                    value="0"
+                                    placeholder="Anzahl Minuten (1-60)"
                                 />
+                                <div id="modal-time-error" class="form-text text-danger"></div>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label"
