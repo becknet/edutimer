@@ -745,6 +745,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
     })();
 
+    // Register Service Worker for offline caching
+    if ("serviceWorker" in navigator) {
+        navigator.serviceWorker
+            .register("sw.js")
+            .catch((err) => console.error("SW registration failed", err));
+    }
+
     var tooltipTriggerList = [].slice.call(
         document.querySelectorAll('[data-bs-toggle="tooltip"]')
     );

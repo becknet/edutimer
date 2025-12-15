@@ -1,0 +1,17 @@
+{
+  "name": "EduTimer",
+  "short_name": "EduTimer",
+  "start_url": "/edutimer/index.html",
+  "scope": "/edutimer/",
+  "display": "standalone",
+  "background_color": "#f8f9fa",
+  "theme_color": "#0d6efd",
+  "description": "Offline-fähige Zeiterfassung für Lehrpersonen Berufsbildung Kanton BL.",
+  "icons": [
+    {
+      "src": "favicon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
+}
