@@ -233,6 +233,9 @@ function loadEntries(currentDate) {
             editBtn.className = "bi bi-pencil-square text-primary me-3";
             editBtn.style.cursor = "pointer";
             editBtn.title = "Bearbeiten";
+            editBtn.setAttribute("role", "button");
+            editBtn.setAttribute("tabindex", "0");
+            editBtn.setAttribute("aria-label", "Eintrag bearbeiten");
 
             const tdDelete = document.createElement("td");
             tdDelete.classList.add("text-end");
@@ -241,9 +244,12 @@ function loadEntries(currentDate) {
             deleteBtn.className = "bi bi-trash text-danger";
             deleteBtn.style.cursor = "pointer";
             deleteBtn.title = "Löschen";
+            deleteBtn.setAttribute("role", "button");
+            deleteBtn.setAttribute("tabindex", "0");
+            deleteBtn.setAttribute("aria-label", "Eintrag löschen");
 
             // Attach handlers
-            editBtn.addEventListener("click", () => {
+            const openEdit = () => {
                 // Populate modal for editing
                 document.getElementById("entryModalLabel").textContent =
                     "Eintrag bearbeiten";
@@ -258,11 +264,26 @@ function loadEntries(currentDate) {
                 bootstrap.Modal.getOrCreateInstance(
                     document.getElementById("entryModal")
                 ).show();
+            };
+            editBtn.addEventListener("click", openEdit);
+            editBtn.addEventListener("keydown", (e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    openEdit();
+                }
             });
-            deleteBtn.addEventListener("click", () => {
+
+            const deleteEntry = () => {
                 if (confirm("Eintrag löschen?")) {
                     tx(STORE_ENTRIES, "readwrite").delete(en.id);
                     loadEntries(currentDate);
+                }
+            };
+            deleteBtn.addEventListener("click", deleteEntry);
+            deleteBtn.addEventListener("keydown", (e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    deleteEntry();
                 }
             });
 
@@ -454,12 +475,8 @@ function clearDB() {
         // If currently in day view, reload entries for the shown date
         const active = document.querySelector("section.active");
         if (active && active.id === "day") {
-            // Use the displayed date text to parse currentDate
-            const parts = document
-                .getElementById("current-date")
-                .textContent.split(".");
-            const d = new Date(parts.reverse().join("-"));
-            loadEntries(d);
+            // Always reload using currentDate to avoid parsing issues
+            loadEntries(currentDate);
         }
     }
 }
