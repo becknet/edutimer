@@ -1,4 +1,4 @@
-const CACHE_NAME = "edutimer-cache-v2";
+const CACHE_NAME = "edutimer-cache-v3";
 const ASSETS = [
     "/edutimer/",
     "/edutimer/index.html",

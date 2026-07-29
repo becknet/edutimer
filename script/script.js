@@ -683,8 +683,47 @@ function calculateGroupSums(entries) {
     return sums;
 }
 
+function initAppOpenTracking() {
+    const displayMode =
+        window.matchMedia("(display-mode: standalone)").matches ||
+        navigator.standalone === true
+            ? "standalone"
+            : "browser";
+    let wasBackgrounded = document.visibilityState === "hidden";
+
+    const trackAppOpen = (openReason) => {
+        if (typeof window.gtag !== "function") return;
+        window.gtag("event", "app_open", {
+            display_mode: displayMode,
+            open_reason: openReason,
+        });
+    };
+
+    const trackForegroundReturn = () => {
+        if (!wasBackgrounded) return;
+        wasBackgrounded = false;
+        trackAppOpen("foreground");
+    };
+
+    trackAppOpen("initial_load");
+
+    document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === "hidden") {
+            wasBackgrounded = true;
+            return;
+        }
+        trackForegroundReturn();
+    });
+    window.addEventListener("pagehide", () => {
+        wasBackgrounded = true;
+    });
+    window.addEventListener("pageshow", trackForegroundReturn);
+}
+
 // --- DOMContentLoaded ---
 document.addEventListener("DOMContentLoaded", () => {
+    initAppOpenTracking();
+
     (async () => {
         await openDB();
         await seedCategories();
